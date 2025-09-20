@@ -3,7 +3,7 @@
  * Este archivo contiene todas las funciones para comunicarse con el backend
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+const API_BASE_URL = process.env.REACT_APP_API_URL || '';
 
 class ApiService {
   constructor() {
@@ -66,6 +66,64 @@ class ApiService {
    */
   async getHealth() {
     return this.request('/health');
+  }
+
+  /**
+   * Obtiene eventos deportivos
+   * @param {string} type - Tipo de evento (opcional)
+   * @returns {Promise<Array>} - Lista de eventos
+   */
+  async getEvents(type = null) {
+    const params = type ? `?type=${type}` : '';
+    return this.request(`/events${params}`);
+  }
+
+  /**
+   * Crea un nuevo evento deportivo
+   * @param {Object} eventData - Datos del evento
+   * @returns {Promise<Object>} - Evento creado
+   */
+  async createEvent(eventData) {
+    return this.request('/events', {
+      method: 'POST',
+      body: JSON.stringify(eventData),
+    });
+  }
+
+  /**
+   * Registra un estudiante en un evento
+   * @param {number} studentId - ID del estudiante
+   * @param {number} eventId - ID del evento
+   * @returns {Promise<Object>} - Resultado del registro
+   */
+  async registerForEvent(studentId, eventId) {
+    return this.request(`/registrations?student_id=${studentId}&event_id=${eventId}`, {
+      method: 'POST',
+    });
+  }
+
+  /**
+   * Crea una nueva cita psicológica
+   * @param {Object} appointmentData - Datos de la cita
+   * @returns {Promise<Object>} - Cita creada
+   */
+  async createAppointment(appointmentData) {
+    return this.request('/appointments', {
+      method: 'POST',
+      body: JSON.stringify(appointmentData),
+    });
+  }
+
+  /**
+   * Crea un nuevo hábito
+   * @param {Object} habitData - Datos del hábito
+   * @returns {Promise<Object>} - Hábito creado
+   */
+  async createHabit(habitData) {
+    return this.request('/habits', {
+      method: 'POST',
+      body: JSON.stringify(habitData),
+    });
   }
 }
 

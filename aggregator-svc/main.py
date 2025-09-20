@@ -35,6 +35,36 @@ def rec(student_id:int):
     suggestion = events[0] if events else None
     return {"avg_mood": avg_mood, "suggested_event": suggestion}
 
+@app.get('/events')
+def get_events(type: str = None):
+    """Obtener eventos deportivos"""
+    events = client.get(f"{SPO}/events", params={"type": type} if type else {}).json()
+    return events
+
+@app.post('/events')
+def create_event(event_data: dict):
+    """Crear nuevo evento deportivo"""
+    response = client.post(f"{SPO}/events", json=event_data)
+    return response.json()
+
+@app.post('/registrations')
+def register_for_event(student_id: int, event_id: int):
+    """Registrar estudiante en evento"""
+    response = client.post(f"{SPO}/registrations", params={"student_id": student_id, "event_id": event_id})
+    return response.json()
+
+@app.post('/appointments')
+def create_appointment(appointment_data: dict):
+    """Crear nueva cita psicológica"""
+    response = client.post(f"{PSY}/api/appointments", json=appointment_data)
+    return response.json()
+
+@app.post('/habits')
+def create_habit(habit_data: dict):
+    """Crear nuevo hábito"""
+    response = client.post(f"{HAB}/habits", json=habit_data)
+    return response.json()
+
 @app.get('/health')
 def health():
     return {"status":"ok"}

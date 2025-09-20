@@ -24,6 +24,21 @@ def list_events(type: str | None = None):
         rows = cn.execute(text(q), {"t": type} if type else {}).mappings().all()
     return list(rows)
 
+@app.post("/events")
+def create_event(event: EventIn):
+    with engine.begin() as cn:
+        result = cn.execute(
+            text("INSERT INTO events(name,type,date,location) VALUES (:name,:type,:date,:location)"),
+            {
+                "name": event.name,
+                "type": event.type,
+                "date": event.date,
+                "location": event.location
+            },
+        )
+        event_id = result.lastrowid
+    return {"id": event_id, "name": event.name, "type": event.type, "date": event.date, "location": event.location}
+
 @app.post("/registrations")
 def add_registration(student_id: int, event_id: int):
     with engine.begin() as cn:
