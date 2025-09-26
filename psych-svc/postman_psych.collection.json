@@ -1,0 +1,76 @@
+{
+  "info": {
+    "name": "psych-svc",
+    "_postman_id": "c7f4f2a1-0d9e-4e7e-bf10-000000000001",
+    "description": "Endpoints for psych microservice (PostgreSQL)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/health"
+      }
+    },
+    {
+      "name": "Create student",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Alice Smith\",\n  \"email\": \"alice@campus.edu\",\n  \"career\": \"Engineering\",\n  \"cohort\": \"2025\"\n}"
+        },
+        "url": "{{baseUrl}}/api/students"
+      }
+    },
+    {
+      "name": "Get student by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/students/{{studentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students", "{{studentId}}"]
+        }
+      }
+    },
+    {
+      "name": "Create appointment",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"studentId\": 1,\n  \"psychologist\": \"Dr. Brown\",\n  \"date\": \"2025-10-15T10:00:00Z\",\n  \"status\": \"CONFIRMED\"\n}"
+        },
+        "url": "{{baseUrl}}/api/appointments"
+      }
+    },
+    {
+      "name": "Get appointments by student",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/students/{{studentId}}/history",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students", "{{studentId}}", "history"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8081" },
+    { "key": "studentId", "value": "1" }
+  ]
+}
+
+

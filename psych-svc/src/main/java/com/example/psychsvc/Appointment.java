@@ -16,7 +16,6 @@ public class Appointment {
 
     public enum Status { PENDING, CONFIRMED, CANCELLED }
 
-    // Getters y setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

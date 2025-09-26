@@ -1,0 +1,119 @@
+{
+  "info": {
+    "name": "aggregator-svc",
+    "_postman_id": "9b2a1b11-0000-4000-8000-000000000001",
+    "description": "Aggregator microservice consuming psych, sports, and habits",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/health"
+      }
+    },
+    {
+      "name": "Wellbeing overview",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/wellbeing/{{studentId}}/overview",
+          "host": ["{{baseUrl}}"],
+          "path": ["wellbeing", "{{studentId}}", "overview"]
+        }
+      }
+    },
+    {
+      "name": "Recommendation",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/wellbeing/recommendation?student_id={{studentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["wellbeing", "recommendation"],
+          "query": [
+            { "key": "student_id", "value": "{{studentId}}" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "List events via aggregator",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/events?type=sport",
+          "host": ["{{baseUrl}}"],
+          "path": ["events"],
+          "query": [
+            { "key": "type", "value": "sport" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create event via aggregator",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Campus Run\",\n  \"type\": \"sport\",\n  \"date\": \"2025-10-10 09:00:00\",\n  \"location\": \"Track\"\n}"
+        },
+        "url": "{{baseUrl}}/events"
+      }
+    },
+    {
+      "name": "Register student to event via aggregator",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/registrations?student_id={{studentId}}&event_id={{eventId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["registrations"],
+          "query": [
+            { "key": "student_id", "value": "{{studentId}}" },
+            { "key": "event_id",   "value": "{{eventId}}" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create appointment via aggregator",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"studentId\": 1,\n  \"psychologist\": \"Dr. Brown\",\n  \"date\": \"2025-10-15T10:00:00Z\",\n  \"status\": \"CONFIRMED\"\n}"
+        },
+        "url": "{{baseUrl}}/appointments"
+      }
+    },
+    {
+      "name": "Create habit via aggregator",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"studentId\": 1,\n  \"sleepHours\": 7,\n  \"exerciseMinutes\": 30,\n  \"mood\": \"good\"\n}"
+        },
+        "url": "{{baseUrl}}/habits"
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "studentId", "value": "1" },
+    { "key": "eventId", "value": "1" }
+  ]
+}
+
+

@@ -15,7 +15,7 @@ export class Habit {
   exerciseMinutes: number;
 
   @Prop()
-  mood: string;      // <-- cambio aquí
+  mood: string;
 
   @Prop({ default: Date.now })
   date: Date;

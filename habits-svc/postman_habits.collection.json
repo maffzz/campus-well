@@ -1,0 +1,50 @@
+{
+  "info": {
+    "name": "habits-svc",
+    "_postman_id": "7f3a2a3d-0000-4000-8000-000000000001",
+    "description": "Endpoints for habits microservice (MongoDB)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/health"
+      }
+    },
+    {
+      "name": "List habits by studentId",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/habits/{{studentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["habits", "{{studentId}}"]
+        }
+      }
+    },
+    {
+      "name": "Create habit",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"studentId\": 1,\n  \"sleepHours\": 7,\n  \"exerciseMinutes\": 30,\n  \"mood\": \"good\"\n}"
+        },
+        "url": "{{baseUrl}}/habits"
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8083" },
+    { "key": "studentId", "value": "1" }
+  ]
+}
+
+

@@ -1,0 +1,71 @@
+{
+    "info": {
+      "name": "sports-svc",
+      "_postman_id": "a6e7f1c9-7c9e-4f0f-9d2a-0a1c0b1a0001",
+      "description": "Endpoints for sports microservice (MySQL)",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+      {
+        "name": "Health",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": "{{baseUrl}}/health"
+        }
+      },
+      {
+        "name": "List events (all)",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": "{{baseUrl}}/events"
+        }
+      },
+      {
+        "name": "List events (type=sport)",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "{{baseUrl}}/events?type=sport",
+            "host": ["{{baseUrl}}"],
+            "path": ["events"],
+            "query": [{ "key": "type", "value": "sport" }]
+          }
+        }
+      },
+      {
+        "name": "Create event",
+        "request": {
+          "method": "POST",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"name\": \"Campus Run\",\n  \"type\": \"sport\",\n  \"date\": \"2025-10-10 09:00:00\",\n  \"location\": \"Track\"\n}"
+          },
+          "url": "{{baseUrl}}/events"
+        }
+      },
+      {
+        "name": "Register student to event",
+        "request": {
+          "method": "POST",
+          "header": [],
+          "url": {
+            "raw": "{{baseUrl}}/registrations?student_id=123&event_id=1",
+            "host": ["{{baseUrl}}"],
+            "path": ["registrations"],
+            "query": [
+              { "key": "student_id", "value": "123" },
+              { "key": "event_id", "value": "1" }
+            ]
+          }
+        }
+      }
+    ],
+    "event": [],
+    "variable": [
+      { "key": "baseUrl", "value": "http://localhost:8082" }
+    ]
+  }

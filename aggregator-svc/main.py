@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 import httpx, os
 
 app = FastAPI(title="aggregator-svc")
@@ -51,6 +51,12 @@ def create_event(event_data: dict):
 def register_for_event(student_id: int, event_id: int):
     """Registrar estudiante en evento"""
     response = client.post(f"{SPO}/registrations", params={"student_id": student_id, "event_id": event_id})
+    if response.status_code >= 400:
+        try:
+            detail = response.json()
+        except Exception:
+            detail = response.text
+        raise HTTPException(status_code=response.status_code, detail=detail)
     return response.json()
 
 @app.post('/appointments')

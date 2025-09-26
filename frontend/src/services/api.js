@@ -3,12 +3,14 @@
  * Este archivo contiene todas las funciones para comunicarse con el backend
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || '';
+const AGG_BASE = process.env.REACT_APP_AGGREGATOR_URL || '';
+const PSY_BASE = process.env.REACT_APP_PSYCH_URL || '';
+const SPO_BASE = process.env.REACT_APP_SPORTS_URL || '';
+const HAB_BASE = process.env.REACT_APP_HABITS_URL || '';
+const ANA_BASE = process.env.REACT_APP_ANALYTICS_URL || '';
 
 class ApiService {
-  constructor() {
-    this.baseURL = API_BASE_URL;
-  }
+  constructor() {}
 
   /**
    * Realiza una petición HTTP
@@ -16,8 +18,7 @@ class ApiService {
    * @param {Object} options - Opciones de la petición
    * @returns {Promise} - Respuesta de la API
    */
-  async request(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`;
+  async requestAbs(url, options = {}) {
     const config = {
       headers: {
         'Content-Type': 'application/json',
@@ -40,13 +41,18 @@ class ApiService {
     }
   }
 
+  // Helper para construir URL
+  buildUrl(base, endpoint) {
+    return `${base}${endpoint}`;
+  }
+
   /**
    * Obtiene la vista general del bienestar de un estudiante
    * @param {number} studentId - ID del estudiante
    * @returns {Promise<Object>} - Datos del bienestar
    */
   async getWellbeingOverview(studentId) {
-    return this.request(`/wellbeing/${studentId}/overview`);
+    return this.requestAbs(this.buildUrl(AGG_BASE, `/wellbeing/${studentId}/overview`));
   }
 
   /**
@@ -55,7 +61,7 @@ class ApiService {
    * @returns {Promise<Object>} - Recomendaciones
    */
   async getRecommendations(studentId) {
-    return this.request(`/wellbeing/recommendation?student_id=${studentId}`, {
+    return this.requestAbs(this.buildUrl(AGG_BASE, `/wellbeing/recommendation?student_id=${studentId}`), {
       method: 'POST',
     });
   }
@@ -65,7 +71,7 @@ class ApiService {
    * @returns {Promise<Object>} - Estado de salud
    */
   async getHealth() {
-    return this.request('/health');
+    return this.requestAbs(this.buildUrl(AGG_BASE, '/health'));
   }
 
   /**
@@ -75,7 +81,7 @@ class ApiService {
    */
   async getEvents(type = null) {
     const params = type ? `?type=${type}` : '';
-    return this.request(`/events${params}`);
+    return this.requestAbs(this.buildUrl(AGG_BASE, `/events${params}`));
   }
 
   /**
@@ -84,7 +90,7 @@ class ApiService {
    * @returns {Promise<Object>} - Evento creado
    */
   async createEvent(eventData) {
-    return this.request('/events', {
+    return this.requestAbs(this.buildUrl(AGG_BASE, '/events'), {
       method: 'POST',
       body: JSON.stringify(eventData),
     });
@@ -97,7 +103,7 @@ class ApiService {
    * @returns {Promise<Object>} - Resultado del registro
    */
   async registerForEvent(studentId, eventId) {
-    return this.request(`/registrations?student_id=${studentId}&event_id=${eventId}`, {
+    return this.requestAbs(this.buildUrl(AGG_BASE, `/registrations?student_id=${studentId}&event_id=${eventId}`), {
       method: 'POST',
     });
   }
@@ -108,7 +114,7 @@ class ApiService {
    * @returns {Promise<Object>} - Cita creada
    */
   async createAppointment(appointmentData) {
-    return this.request('/appointments', {
+    return this.requestAbs(this.buildUrl(AGG_BASE, '/appointments'), {
       method: 'POST',
       body: JSON.stringify(appointmentData),
     });
@@ -120,10 +126,64 @@ class ApiService {
    * @returns {Promise<Object>} - Hábito creado
    */
   async createHabit(habitData) {
-    return this.request('/habits', {
+    return this.requestAbs(this.buildUrl(AGG_BASE, '/habits'), {
       method: 'POST',
       body: JSON.stringify(habitData),
     });
+  }
+
+  // ==== Llamadas directas por microservicio (para cumplir rúbrica) ====
+  // psych-svc (PostgreSQL)
+  async getStudent(id) {
+    return this.requestAbs(this.buildUrl(PSY_BASE, `/api/students/${id}`));
+  }
+  async createStudent(student) {
+    return this.requestAbs(this.buildUrl(PSY_BASE, `/api/students`), {
+      method: 'POST',
+      body: JSON.stringify(student),
+    });
+  }
+  async getAppointmentsByStudent(id) {
+    return this.requestAbs(this.buildUrl(PSY_BASE, `/api/students/${id}/history`));
+  }
+
+  // sports-svc (MySQL)
+  async sportsListEvents(type = null) {
+    const params = type ? `?type=${type}` : '';
+    return this.requestAbs(this.buildUrl(SPO_BASE, `/events${params}`));
+  }
+  async sportsCreateEvent(eventData) {
+    return this.requestAbs(this.buildUrl(SPO_BASE, `/events`), {
+      method: 'POST',
+      body: JSON.stringify(eventData),
+    });
+  }
+
+  // habits-svc (MongoDB)
+  async habitsList(studentId) {
+    return this.requestAbs(this.buildUrl(HAB_BASE, `/habits/${studentId}`));
+  }
+  async habitsCreate(habit) {
+    return this.requestAbs(this.buildUrl(HAB_BASE, `/habits`), {
+      method: 'POST',
+      body: JSON.stringify(habit),
+    });
+  }
+
+  // aggregator-svc (sin BD)
+  async aggregatorHealth() {
+    return this.requestAbs(this.buildUrl(AGG_BASE, `/health`));
+  }
+  async aggregatorOverview(id) {
+    return this.requestAbs(this.buildUrl(AGG_BASE, `/wellbeing/${id}/overview`));
+  }
+
+  // analytics-svc (Athena)
+  async analyticsStressTrends() {
+    return this.requestAbs(this.buildUrl(ANA_BASE, `/analytics/stress-trends`));
+  }
+  async analyticsHealth() {
+    return this.requestAbs(this.buildUrl(ANA_BASE, `/health`));
   }
 }
 
