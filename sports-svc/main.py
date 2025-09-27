@@ -11,6 +11,8 @@ app = FastAPI(title="sports-svc")
 origins = [
     "http://localhost:3000",  # tu frontend en desarrollo
     "http://127.0.0.1:3000",
+    "http://frontend:80",  # frontend en Docker
+    "http://campuswell-frontend-1:80",  # nombre del contenedor
     # "https://tudominio.com"  # si luego tienes producción
 ]
 

@@ -82,7 +82,7 @@ public class PsychSvcApplication {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000") // frontend
+                        .allowedOrigins("http://localhost:3000", "http://frontend:80", "http://campuswell-frontend-1:80") // frontend
                         .allowedMethods("*")
                         .allowedHeaders("*");
             }

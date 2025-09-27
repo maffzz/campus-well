@@ -8,7 +8,8 @@ app = FastAPI(title='analytics-svc')
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    # "https://tudominio.com"  # si tienes producción
+    "http://frontend:80",
+    "http://campuswell-frontend-1:80",
 ]
 
 app.add_middleware(
@@ -19,12 +20,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ===== Athena client =====
 athena = boto3.client('athena', region_name=os.getenv('AWS_REGION'))
 DB  = os.getenv('ATHENA_DB')
 OUT = os.getenv('ATHENA_OUTPUT')
 
-# ===== Queries =====
 SQL_STRESS = """
 SELECT date_trunc('week', date) wk, count(*) confirmed
 FROM psych_appointments

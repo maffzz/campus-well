@@ -19,6 +19,8 @@ async function bootstrap() {
     origin: [
       'http://localhost:3000', // Frontend React en desarrollo
       'http://127.0.0.1:3000',
+      'http://frontend:80', // frontend en Docker
+      'http://campuswell-frontend-1:80', // nombre del contenedor
       // 'https://tudominio.com'  // 👉 agrega tu dominio en producción si aplica
     ],
     methods: '*',         // Permite todos los métodos (GET, POST, etc.)
