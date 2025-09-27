@@ -4,7 +4,6 @@ import httpx, os
 
 app = FastAPI(title="aggregator-svc")
 
-# Configuración de CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://frontend:80", "http://campuswell-frontend-1:80"],
@@ -18,9 +17,8 @@ PSY = os.getenv("PSYCH_BASE", "http://psych-svc:8081")
 SPO = os.getenv("SPORTS_BASE", "http://sports-svc:8082")
 HAB = os.getenv("HABITS_BASE", "http://habits-svc:8083")
 
-client = httpx.Client(timeout=5.0)
+client = httpx.Client(timeout=10.0, limits=httpx.Limits(max_connections=100, max_keepalive_connections=20))
 
-# ========== WELLBEING ==========
 @app.get("/wellbeing/{student_id}/overview")
 def overview(student_id: int):
     """Resumen completo de un estudiante"""
