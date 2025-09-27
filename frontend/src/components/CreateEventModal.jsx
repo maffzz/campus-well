@@ -3,7 +3,7 @@ import { Calendar, MapPin, Tag } from 'lucide-react';
 import apiService from '../services/api';
 import toast from 'react-hot-toast';
 
-const CreateEventModal = ({ isOpen, onClose }) => {
+const CreateEventModal = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     name: '',
     type: 'sport',
@@ -20,13 +20,13 @@ const CreateEventModal = ({ isOpen, onClose }) => {
       const eventData = {
         name: formData.name,
         type: formData.type,
-        date: formData.date,
+        date: `${formData.date} 09:00:00`, // Formato requerido por la API
         location: formData.location
       };
 
       await apiService.createEvent(eventData);
-      toast.success('Evento creado exitosamente!');
       onClose();
+      if (onSuccess) onSuccess();
       
       // Reset form
       setFormData({
@@ -51,7 +51,7 @@ const CreateEventModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className={`fixed inset-0 z-50 overflow-y-auto ${isOpen ? 'block' : 'hidden'}`}>
+    <div className={`fixed inset-0 z-[9999] overflow-y-auto ${isOpen ? 'block' : 'hidden'}`}>
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
         

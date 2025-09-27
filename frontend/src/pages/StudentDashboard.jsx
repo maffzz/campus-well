@@ -42,13 +42,36 @@ const StudentDashboard = () => {
   const loadData = async () => {
     try {
       setError(null);
-      const [wellbeingData, recommendationsData] = await Promise.all([
-        apiService.getWellbeingOverview(studentId),
-        apiService.getRecommendations(studentId)
-      ]);
       
-      setWellbeing(wellbeingData);
-      setRecommendations(recommendationsData);
+      // Intentar primero con el aggregator
+      try {
+        const [wellbeingData, recommendationsData] = await Promise.all([
+          apiService.getWellbeingOverview(studentId),
+          apiService.getRecommendations(studentId)
+        ]);
+        
+        setWellbeing(wellbeingData);
+        setRecommendations(recommendationsData);
+      } catch (aggError) {
+        console.warn('Aggregator no disponible, usando métodos directos:', aggError);
+        
+        // Si el aggregator falla, usar métodos directos
+        const [studentData, appointmentsData, habitsData] = await Promise.all([
+          apiService.getStudent(studentId).catch(() => null),
+          apiService.getAppointmentsByStudent(studentId).catch(() => []),
+          apiService.getHabitsDirect(studentId).catch(() => [])
+        ]);
+        
+        // Construir datos de bienestar manualmente
+        const wellbeingData = {
+          student: studentData,
+          appointments: appointmentsData || [],
+          habits: habitsData || []
+        };
+        
+        setWellbeing(wellbeingData);
+        setRecommendations(null); // No hay recomendaciones sin aggregator
+      }
     } catch (err) {
       setError(err.message);
       toast.error(err.message);
@@ -64,9 +87,41 @@ const StudentDashboard = () => {
     toast.success('Datos actualizados correctamente');
   };
 
+  const handleRegisterForEvent = async (eventId) => {
+    try {
+      // Intentar primero con el aggregator
+      try {
+        await apiService.registerForEvent(studentId, eventId);
+        toast.success('Te has registrado exitosamente en el evento');
+      } catch (aggError) {
+        console.warn('Aggregator no disponible, usando método directo:', aggError);
+        // Si el aggregator falla, usar método directo
+        await apiService.sportsRegisterForEvent(studentId, eventId);
+        toast.success('Te has registrado exitosamente en el evento');
+      }
+      await loadData(); // Recargar datos para actualizar recomendaciones
+    } catch (error) {
+      toast.error('Error al registrarse en el evento');
+      console.error('Error registering for event:', error);
+    }
+  };
+
+  const handleCreateEvent = () => {
+    setShowEventModal(true);
+  };
+
   useEffect(() => {
     loadData();
   }, [studentId]);
+
+  // Debug: Log modal states
+  useEffect(() => {
+    console.log('Modal states:', {
+      showAppointmentModal,
+      showHabitModal,
+      showEventModal
+    });
+  }, [showAppointmentModal, showHabitModal, showEventModal]);
 
   if (loading) {
     return <LoadingSpinner />;
@@ -158,13 +213,22 @@ const StudentDashboard = () => {
 
           {/* Appointments */}
           <AppointmentsList appointments={appointments} />
+
+          {/* Events */}
+          <EventsList 
+            studentId={studentId}
+            onCreateEvent={handleCreateEvent}
+          />
         </div>
 
         {/* Right Column - Sidebar */}
         <div className="space-y-6">
           {/* Recommendations */}
           {recommendations && (
-            <RecommendationsCard recommendations={recommendations} />
+            <RecommendationsCard 
+              recommendations={recommendations}
+              onRegisterForEvent={handleRegisterForEvent}
+            />
           )}
 
           {/* Quick Actions */}
@@ -172,24 +236,36 @@ const StudentDashboard = () => {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h3>
             <div className="space-y-3">
               <button 
-                className="w-full btn-primary"
-                onClick={() => setShowAppointmentModal(true)}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors cursor-pointer"
+                onClick={() => {
+                  console.log('Clicking appointment button');
+                  setShowAppointmentModal(true);
+                }}
+                type="button"
               >
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="mr-2 h-4 w-4 inline" />
                 Nueva Cita
               </button>
               <button 
-                className="w-full btn-secondary"
-                onClick={() => setShowHabitModal(true)}
+                className="w-full bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-4 rounded-lg transition-colors cursor-pointer"
+                onClick={() => {
+                  console.log('Clicking habit button');
+                  setShowHabitModal(true);
+                }}
+                type="button"
               >
-                <Activity className="mr-2 h-4 w-4" />
+                <Activity className="mr-2 h-4 w-4 inline" />
                 Registrar Hábito
               </button>
               <button 
-                className="w-full btn-secondary"
-                onClick={() => setShowEventModal(true)}
+                className="w-full bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-4 rounded-lg transition-colors cursor-pointer"
+                onClick={() => {
+                  console.log('Clicking event button');
+                  setShowEventModal(true);
+                }}
+                type="button"
               >
-                <Calendar className="mr-2 h-4 w-4" />
+                <Calendar className="mr-2 h-4 w-4 inline" />
                 Crear Evento
               </button>
             </div>
@@ -215,24 +291,61 @@ const StudentDashboard = () => {
       </div>
 
       {/* Events Section */}
-      <EventsList studentId={studentId} />
+      <EventsList 
+        studentId={studentId}
+        onCreateEvent={handleCreateEvent}
+      />
+
+      {/* Debug Info */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="fixed bottom-4 right-4 bg-black text-white p-2 rounded text-xs">
+          <div>Modals: A:{showAppointmentModal ? '1' : '0'} H:{showHabitModal ? '1' : '0'} E:{showEventModal ? '1' : '0'}</div>
+          <button 
+            onClick={() => setShowAppointmentModal(true)}
+            className="bg-red-500 text-white px-2 py-1 rounded text-xs mt-1"
+          >
+            Test Modal
+          </button>
+        </div>
+      )}
 
       {/* Modals */}
       <CreateAppointmentModal
         isOpen={showAppointmentModal}
-        onClose={() => setShowAppointmentModal(false)}
+        onClose={() => {
+          console.log('Closing appointment modal');
+          setShowAppointmentModal(false);
+        }}
         studentId={studentId}
+        onSuccess={() => {
+          loadData();
+          toast.success('Cita creada exitosamente');
+        }}
       />
       
       <CreateHabitModal
         isOpen={showHabitModal}
-        onClose={() => setShowHabitModal(false)}
+        onClose={() => {
+          console.log('Closing habit modal');
+          setShowHabitModal(false);
+        }}
         studentId={studentId}
+        onSuccess={() => {
+          loadData();
+          toast.success('Hábito registrado exitosamente');
+        }}
       />
       
       <CreateEventModal
         isOpen={showEventModal}
-        onClose={() => setShowEventModal(false)}
+        onClose={() => {
+          console.log('Closing event modal');
+          setShowEventModal(false);
+        }}
+        onSuccess={() => {
+          loadData();
+          toast.success('Evento creado exitosamente');
+        }}
       />
     </div>
   );

@@ -4,6 +4,11 @@ import { Toaster } from 'react-hot-toast';
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
 import StudentDashboard from './pages/StudentDashboard';
+import PsychologyPage from './pages/PsychologyPage';
+import ActivityPage from './pages/ActivityPage';
+import HabitsPage from './pages/HabitsPage';
+import AdminAnalytics from './pages/AdminAnalytics';
+import AdminDashboard from './pages/AdminDashboard';
 import './index.css';
 
 function App() {
@@ -14,6 +19,11 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/student/:studentId" element={<StudentDashboard />} />
+            <Route path="/psychology/:studentId" element={<PsychologyPage />} />
+            <Route path="/activity/:studentId" element={<ActivityPage />} />
+            <Route path="/habits/:studentId" element={<HabitsPage />} />
+            <Route path="/admin/analytics" element={<AdminAnalytics />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
           </Routes>
         </Layout>
         <Toaster 

@@ -5,7 +5,7 @@ import { es } from 'date-fns/locale';
 import apiService from '../services/api';
 import toast from 'react-hot-toast';
 
-const EventsList = ({ studentId }) => {
+const EventsList = ({ studentId, onCreateEvent }) => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -17,8 +17,17 @@ const EventsList = ({ studentId }) => {
   const loadEvents = async () => {
     try {
       setLoading(true);
-      const eventsData = await apiService.getEvents(filter === 'all' ? null : filter);
-      setEvents(eventsData);
+      
+      // Intentar primero con el aggregator
+      try {
+        const eventsData = await apiService.getEvents(filter === 'all' ? null : filter);
+        setEvents(eventsData);
+      } catch (aggError) {
+        console.warn('Aggregator no disponible, usando método directo:', aggError);
+        // Si el aggregator falla, usar método directo
+        const eventsData = await apiService.sportsListEvents(filter === 'all' ? null : filter);
+        setEvents(eventsData);
+      }
     } catch (error) {
       toast.error('Error al cargar eventos');
       console.error('Error loading events:', error);
@@ -29,8 +38,16 @@ const EventsList = ({ studentId }) => {
 
   const handleRegister = async (eventId) => {
     try {
-      await apiService.registerForEvent(studentId, eventId);
-      toast.success('Te has registrado exitosamente en el evento');
+      // Intentar primero con el aggregator
+      try {
+        await apiService.registerForEvent(studentId, eventId);
+        toast.success('Te has registrado exitosamente en el evento');
+      } catch (aggError) {
+        console.warn('Aggregator no disponible, usando método directo:', aggError);
+        // Si el aggregator falla, usar método directo
+        await apiService.sportsRegisterForEvent(studentId, eventId);
+        toast.success('Te has registrado exitosamente en el evento');
+      }
       loadEvents(); // Recargar eventos
     } catch (error) {
       toast.error('Error al registrarse en el evento');
@@ -108,7 +125,10 @@ const EventsList = ({ studentId }) => {
               {events.length} evento{events.length !== 1 ? 's' : ''} disponible{events.length !== 1 ? 's' : ''}
             </p>
           </div>
-          <button className="btn-primary">
+          <button 
+            className="btn-primary"
+            onClick={onCreateEvent}
+          >
             <Plus className="mr-2 h-4 w-4" />
             Crear Evento
           </button>
@@ -153,7 +173,7 @@ const EventsList = ({ studentId }) => {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {events.map((event) => (
             <div
-              key={event.id}
+              key={event._id || event.id}
               className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
             >
               <div className="flex items-start justify-between mb-3">

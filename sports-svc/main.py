@@ -1,4 +1,5 @@
 from fastapi import (FastAPI, HTTPException)
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import IntegrityError
@@ -6,6 +7,21 @@ import os
 import httpx
 
 app = FastAPI(title="sports-svc")
+
+origins = [
+    "http://localhost:3000",  # tu frontend en desarrollo
+    "http://127.0.0.1:3000",
+    # "https://tudominio.com"  # si luego tienes producción
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,         # or ["*"] para permitir todos
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 DB_URL = (
     f"mysql+pymysql://{os.getenv('MYSQL_USER')}"

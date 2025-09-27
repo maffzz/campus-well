@@ -1,12 +1,30 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import boto3, os, time
 
 app = FastAPI(title='analytics-svc')
 
+# ===== CORS =====
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    # "https://tudominio.com"  # si tienes producción
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ===== Athena client =====
 athena = boto3.client('athena', region_name=os.getenv('AWS_REGION'))
 DB  = os.getenv('ATHENA_DB')
 OUT = os.getenv('ATHENA_OUTPUT')
 
+# ===== Queries =====
 SQL_STRESS = """
 SELECT date_trunc('week', date) wk, count(*) confirmed
 FROM psych_appointments
@@ -29,6 +47,7 @@ GROUP BY 1
 ORDER BY 1
 """
 
+# ===== Endpoints =====
 @app.get('/analytics/stress-trends')
 def stress():
     q = athena.start_query_execution(

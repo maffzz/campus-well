@@ -3,7 +3,7 @@ import { Moon, Dumbbell, Heart } from 'lucide-react';
 import apiService from '../services/api';
 import toast from 'react-hot-toast';
 
-const CreateHabitModal = ({ isOpen, onClose, studentId }) => {
+const CreateHabitModal = ({ isOpen, onClose, studentId, onSuccess }) => {
   const [formData, setFormData] = useState({
     sleepHours: '',
     exerciseMinutes: '',
@@ -20,13 +20,19 @@ const CreateHabitModal = ({ isOpen, onClose, studentId }) => {
         studentId: parseInt(studentId),
         sleepHours: parseInt(formData.sleepHours),
         exerciseMinutes: parseInt(formData.exerciseMinutes),
-        mood: formData.mood,
-        date: new Date().toISOString()
+        mood: formData.mood
       };
 
-      await apiService.createHabit(habitData);
-      toast.success('Hábito registrado exitosamente!');
+      // Intentar primero con el aggregator
+      try {
+        await apiService.createHabit(habitData);
+      } catch (aggError) {
+        console.warn('Aggregator no disponible, usando método directo:', aggError);
+        // Si el aggregator falla, usar método directo
+        await apiService.createHabitDirect(habitData);
+      }
       onClose();
+      if (onSuccess) onSuccess();
       
       // Reset form
       setFormData({
@@ -50,7 +56,7 @@ const CreateHabitModal = ({ isOpen, onClose, studentId }) => {
   };
 
   return (
-    <div className={`fixed inset-0 z-50 overflow-y-auto ${isOpen ? 'block' : 'hidden'}`}>
+    <div className={`fixed inset-0 z-[9999] overflow-y-auto ${isOpen ? 'block' : 'hidden'}`}>
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
         

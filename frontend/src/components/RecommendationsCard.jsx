@@ -3,7 +3,7 @@ import { Lightbulb, Calendar, MapPin, Clock, Star } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-const RecommendationsCard = ({ recommendations }) => {
+const RecommendationsCard = ({ recommendations, onRegisterForEvent }) => {
   if (!recommendations) {
     return (
       <div className="card">
@@ -103,7 +103,10 @@ const RecommendationsCard = ({ recommendations }) => {
                 </div>
               </div>
               <div className="mt-4">
-                <button className="w-full btn-primary">
+                <button 
+                  className="w-full btn-primary"
+                  onClick={() => onRegisterForEvent && onRegisterForEvent(suggested_event.id)}
+                >
                   Participar en el Evento
                 </button>
               </div>

@@ -3,14 +3,15 @@
  * Este archivo contiene todas las funciones para comunicarse con el backend
  */
 
-const AGG_BASE = process.env.REACT_APP_AGGREGATOR_URL || '';
-const PSY_BASE = process.env.REACT_APP_PSYCH_URL || '';
-const SPO_BASE = process.env.REACT_APP_SPORTS_URL || '';
-const HAB_BASE = process.env.REACT_APP_HABITS_URL || '';
-const ANA_BASE = process.env.REACT_APP_ANALYTICS_URL || '';
+import config from '../config.js';
+
+const AGG_BASE = config.AGGREGATOR_URL;
+const PSY_BASE = config.PSYCH_URL;
+const SPO_BASE = config.SPORTS_URL;
+const HAB_BASE = config.HABITS_URL;
+const ANA_BASE = config.ANALYTICS_URL;
 
 class ApiService {
-  constructor() {}
 
   /**
    * Realiza una petición HTTP
@@ -31,15 +32,24 @@ class ApiService {
       const response = await fetch(url, config);
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error(`API Error ${response.status}:`, errorText);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
       
-      return await response.json();
+      // Verificar si la respuesta tiene contenido
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        return await response.json();
+      } else {
+        return { message: 'Success', status: response.status };
+      }
     } catch (error) {
       console.error('API Error:', error);
       throw error;
     }
   }
+
 
   // Helper para construir URL
   buildUrl(base, endpoint) {
@@ -61,8 +71,9 @@ class ApiService {
    * @returns {Promise<Object>} - Recomendaciones
    */
   async getRecommendations(studentId) {
-    return this.requestAbs(this.buildUrl(AGG_BASE, `/wellbeing/recommendation?student_id=${studentId}`), {
+    return this.requestAbs(this.buildUrl(AGG_BASE, `/wellbeing/recommendation`), {
       method: 'POST',
+      body: JSON.stringify({ student_id: parseInt(studentId) }),
     });
   }
 
@@ -103,8 +114,12 @@ class ApiService {
    * @returns {Promise<Object>} - Resultado del registro
    */
   async registerForEvent(studentId, eventId) {
-    return this.requestAbs(this.buildUrl(AGG_BASE, `/registrations?student_id=${studentId}&event_id=${eventId}`), {
+    return this.requestAbs(this.buildUrl(AGG_BASE, `/registrations`), {
       method: 'POST',
+      body: JSON.stringify({ 
+        student_id: parseInt(studentId), 
+        event_id: parseInt(eventId) 
+      }),
     });
   }
 
@@ -133,7 +148,7 @@ class ApiService {
   }
 
   // ==== Llamadas directas por microservicio (para cumplir rúbrica) ====
-  // psych-svc (PostgreSQL)
+  // psych-svc (PostgreSQL) - CORREGIDO según Postman
   async getStudent(id) {
     return this.requestAbs(this.buildUrl(PSY_BASE, `/api/students/${id}`));
   }
@@ -146,8 +161,17 @@ class ApiService {
   async getAppointmentsByStudent(id) {
     return this.requestAbs(this.buildUrl(PSY_BASE, `/api/students/${id}/history`));
   }
+  async createAppointmentDirect(appointmentData) {
+    return this.requestAbs(this.buildUrl(PSY_BASE, `/api/appointments`), {
+      method: 'POST',
+      body: JSON.stringify(appointmentData),
+    });
+  }
+  async psychHealth() {
+    return this.requestAbs(this.buildUrl(PSY_BASE, `/api/health`));
+  }
 
-  // sports-svc (MySQL)
+  // sports-svc (MySQL) - CORREGIDO según Postman
   async sportsListEvents(type = null) {
     const params = type ? `?type=${type}` : '';
     return this.requestAbs(this.buildUrl(SPO_BASE, `/events${params}`));
@@ -158,8 +182,16 @@ class ApiService {
       body: JSON.stringify(eventData),
     });
   }
+  async sportsRegisterForEvent(studentId, eventId) {
+    return this.requestAbs(this.buildUrl(SPO_BASE, `/registrations?student_id=${studentId}&event_id=${eventId}`), {
+      method: 'POST',
+    });
+  }
+  async sportsHealth() {
+    return this.requestAbs(this.buildUrl(SPO_BASE, `/health`));
+  }
 
-  // habits-svc (MongoDB)
+  // habits-svc (MongoDB) - CORREGIDO según Postman
   async habitsList(studentId) {
     return this.requestAbs(this.buildUrl(HAB_BASE, `/habits/${studentId}`));
   }
@@ -167,6 +199,20 @@ class ApiService {
     return this.requestAbs(this.buildUrl(HAB_BASE, `/habits`), {
       method: 'POST',
       body: JSON.stringify(habit),
+    });
+  }
+  async habitsHealth() {
+    return this.requestAbs(this.buildUrl(HAB_BASE, `/health`));
+  }
+
+  // Métodos alternativos para cuando el aggregator no esté disponible
+  async getHabitsDirect(studentId) {
+    return this.requestAbs(this.buildUrl(HAB_BASE, `/habits/${studentId}`));
+  }
+  async createHabitDirect(habitData) {
+    return this.requestAbs(this.buildUrl(HAB_BASE, `/habits`), {
+      method: 'POST',
+      body: JSON.stringify(habitData),
     });
   }
 

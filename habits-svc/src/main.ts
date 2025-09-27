@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // --- Configuración de Swagger ---
   const config = new DocumentBuilder()
     .setTitle('habits-svc')
     .setDescription('API de hábitos de estudiantes')
@@ -13,7 +14,18 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document);
 
-  app.enableCors();
+  // --- ✅ Configuración de CORS ---
+  app.enableCors({
+    origin: [
+      'http://localhost:3000', // Frontend React en desarrollo
+      'http://127.0.0.1:3000',
+      // 'https://tudominio.com'  // 👉 agrega tu dominio en producción si aplica
+    ],
+    methods: '*',         // Permite todos los métodos (GET, POST, etc.)
+    allowedHeaders: '*',  // Permite todos los headers
+    credentials: true     // Necesario si usas cookies o auth
+  });
+
   await app.listen(8083, '0.0.0.0');
 }
 bootstrap();

@@ -1,5 +1,8 @@
 package com.example.psychsvc;
 
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.CommandLineRunner;
@@ -22,15 +25,14 @@ public class PsychSvcApplication {
     CommandLineRunner seedData(StudentRepo students, AppointmentRepo appts) {
         return args -> {
             String seed = System.getenv("SEED_PSYCH");
-            if (seed == null || !seed.equalsIgnoreCase("true")) {
-                return;
-            }
-            if (students.count() > 0 && appts.count() >= 20000) {
-                return;
-            }
+            if (seed == null || !seed.equalsIgnoreCase("true")) return;
+            if (students.count() > 0 && appts.count() >= 20000) return;
+
             Random rnd = new Random();
             long existingStudents = students.count();
             int targetStudents = 5000;
+
+            // ---- Seed Students ----
             if (existingStudents < targetStudents) {
                 List<Student> bufS = new ArrayList<>();
                 for (int i = (int) existingStudents + 1; i <= targetStudents; i++) {
@@ -48,6 +50,7 @@ public class PsychSvcApplication {
                 if (!bufS.isEmpty()) students.saveAll(bufS);
             }
 
+            // ---- Seed Appointments ----
             Appointment.Status[] statuses = Appointment.Status.values();
             long maxId = students.count();
             int total = 20000;
@@ -58,7 +61,7 @@ public class PsychSvcApplication {
                     Appointment a = new Appointment();
                     long sid = 1 + rnd.nextInt((int) maxId);
                     a.setStudentId(sid);
-                    a.setPsychologist("Dr. "+ (char)('A' + rnd.nextInt(26)));
+                    a.setPsychologist("Dr. " + (char) ('A' + rnd.nextInt(26)));
                     a.setDate(OffsetDateTime.now(ZoneOffset.UTC).minusDays(rnd.nextInt(365)));
                     a.setStatus(statuses[rnd.nextInt(statuses.length)]);
                     bufA.add(a);
@@ -71,4 +74,19 @@ public class PsychSvcApplication {
             }
         };
     }
+
+    // ✅ CORS para permitir llamadas desde el frontend
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOrigins("http://localhost:3000") // frontend
+                        .allowedMethods("*")
+                        .allowedHeaders("*");
+            }
+        };
+    }
 }
+

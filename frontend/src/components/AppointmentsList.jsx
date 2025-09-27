@@ -60,7 +60,7 @@ const AppointmentsList = ({ appointments }) => {
         <div className="space-y-4">
           {appointments.map((appointment) => (
             <div
-              key={appointment.id}
+              key={appointment._id || appointment.id}
               className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
             >
               <div className="flex items-center space-x-4">

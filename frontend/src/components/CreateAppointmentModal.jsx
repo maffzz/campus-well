@@ -3,7 +3,7 @@ import { Calendar, User, Clock } from 'lucide-react';
 import apiService from '../services/api';
 import toast from 'react-hot-toast';
 
-const CreateAppointmentModal = ({ isOpen, onClose, studentId }) => {
+const CreateAppointmentModal = ({ isOpen, onClose, studentId, onSuccess }) => {
   const [formData, setFormData] = useState({
     psychologist: '',
     date: '',
@@ -24,9 +24,16 @@ const CreateAppointmentModal = ({ isOpen, onClose, studentId }) => {
         status: formData.status
       };
 
-      await apiService.createAppointment(appointmentData);
-      toast.success('Cita creada exitosamente!');
+      // Intentar primero con el aggregator
+      try {
+        await apiService.createAppointment(appointmentData);
+      } catch (aggError) {
+        console.warn('Aggregator no disponible, usando método directo:', aggError);
+        // Si el aggregator falla, usar método directo
+        await apiService.createAppointmentDirect(appointmentData);
+      }
       onClose();
+      if (onSuccess) onSuccess();
       
       // Reset form
       setFormData({
@@ -51,7 +58,7 @@ const CreateAppointmentModal = ({ isOpen, onClose, studentId }) => {
   };
 
   return (
-    <div className={`fixed inset-0 z-50 overflow-y-auto ${isOpen ? 'block' : 'hidden'}`}>
+    <div className={`fixed inset-0 z-[9999] overflow-y-auto ${isOpen ? 'block' : 'hidden'}`}>
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
         
