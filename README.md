@@ -428,8 +428,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 - **Annemarie Saldarriaga** - *Backend y Frontend* - [AnnieSld](https://github.com/AnnieSld)
 - **Martin Bonilla** - *Despliegue* - [marbs23](https://github.com/marbs23)
 - **Ana Huapaya** - *Despliegue* - [ana17hy](https://github.com/ana17hy)
-- **Juan Renato Flores** - *Despliegue* - [tu-github](https://github.com/tu-usuario)
-
+- **Juan Renato Flores** - *Despliegue* - [jfloredev](https://github.com/jfloredev)
 
 ## 🙏 Agradecimientos
 
