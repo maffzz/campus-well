@@ -1,66 +1,91 @@
 # 🏫 CampusWell - Sistema de Bienestar Estudiantil
 
-## 📋 Descripción del Proyecto
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.java.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 
-CampusWell es una aplicación de microservicios diseñada para el bienestar estudiantil, que incluye gestión de citas psicológicas, hábitos de vida, eventos deportivos y análisis de tendencias de estrés.
+## 📋 Descripción
+
+CampusWell es una plataforma integral de microservicios diseñada para mejorar el bienestar estudiantil universitario. El sistema integra servicios de psicología, deportes, hábitos de vida y análisis de datos para proporcionar una experiencia completa de apoyo estudiantil.
+
+## ✨ Características Principales
+
+- 🧠 **Gestión de Citas Psicológicas** - Sistema completo de citas y seguimiento
+- 🏃 **Eventos Deportivos** - Organización y registro en actividades deportivas
+- 📊 **Seguimiento de Hábitos** - Monitoreo de sueño, ejercicio y estado de ánimo
+- 📈 **Analytics Avanzado** - Análisis de tendencias de estrés y bienestar
+- 🔗 **API Agregadora** - Endpoints que combinan datos de múltiples servicios
+- 🎨 **Frontend Moderno** - Interfaz React con diseño responsivo
 
 ## 🏗️ Arquitectura del Sistema
 
-El sistema está compuesto por **5 microservicios** que se comunican entre sí:
+### Microservicios
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │  Aggregator     │    │   Analytics     │
-│   (React/Vue)   │◄───┤   Service       │◄───┤   Service       │
-│                 │    │   (Port 8080)   │    │   (Port 8084)   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                              │
-                    ┌─────────┼─────────┐
-                    │         │         │
-            ┌───────▼───┐ ┌───▼───┐ ┌───▼───┐
-            │  Psych    │ │Sports │ │Habits │
-            │ Service   │ │Service│ │Service│
-            │(Port 8081)│ │(8082) │ │(8083) │
-            └───────────┘ └───────┘ └───────┘
-                    │         │         │
-            ┌───────▼───┐ ┌───▼───┐ ┌───▼───┐
-            │PostgreSQL │ │ MySQL │ │MongoDB│
-            │ Database  │ │Database│ │Database│
-            └───────────┘ └───────┘ └───────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                        Frontend (React)                        │
+│                         Port: 3000                             │
+└─────────────────────┬───────────────────────────────────────────┘
+                      │
+┌─────────────────────▼───────────────────────────────────────────┐
+│                   Aggregator Service                            │
+│                      Port: 8080                                │
+│  • /wellbeing/{id}/overview                                    │
+│  • /wellbeing/recommendation                                   │
+└─────┬───────────────┬───────────────┬───────────────────────────┘
+      │               │               │
+┌─────▼─────┐ ┌───────▼─────┐ ┌──────▼─────┐ ┌─────────────────┐
+│Psych Svc  │ │Sports Svc   │ │Habits Svc  │ │Analytics Svc    │
+│Port: 8081 │ │Port: 8082   │ │Port: 8083  │ │Port: 8084       │
+│PostgreSQL │ │MySQL        │ │MongoDB     │ │AWS Athena       │
+└───────────┘ └─────────────┘ └────────────┘ └─────────────────┘
 ```
 
-## 🚀 Inicio Rápido
+### Tecnologías Utilizadas
+
+| Servicio | Tecnología | Base de Datos | Puerto |
+|----------|------------|---------------|--------|
+| Frontend | React + Tailwind CSS | - | 3000 |
+| Aggregator | Python + FastAPI | - | 8080 |
+| Psychology | Java + Spring Boot | PostgreSQL | 8081 |
+| Sports | Python + FastAPI | MySQL | 8082 |
+| Habits | Node.js + NestJS | MongoDB | 8083 |
+| Analytics | Python + FastAPI | AWS Athena | 8084 |
+
+## 🚀 Instalación y Configuración
 
 ### Prerrequisitos
-- Docker y Docker Compose
-- Node.js (para desarrollo local)
-- Java 21+ (para desarrollo local)
-- Python 3.12+ (para desarrollo local)
 
-### 1. Clonar y Configurar
+- **Docker** 20.10+
+- **Docker Compose** 2.0+
+- **Git**
+
+### 1. Clonar el Repositorio
+
 ```bash
 git clone <repository-url>
 cd campuswell
 ```
 
 ### 2. Configurar Variables de Entorno
+
 Crear archivo `.env` en la raíz del proyecto:
+
 ```bash
 # Database Configuration
-# MySQL (para sports-svc)
 MYSQL_DATABASE=campuswell
 MYSQL_USER=campus
 MYSQL_PASSWORD=campus
-
-# PostgreSQL (para psych-svc)
 POSTGRES_DB=campuswell
 POSTGRES_USER=campus
 POSTGRES_PASSWORD=campus
 
-# Service URLs (para desarrollo local)
-PSYCH_BASE=http://localhost:8081
-SPORTS_BASE=http://localhost:8082
-HABITS_BASE=http://localhost:8083
+# Service URLs (para Docker)
+PSYCH_BASE=http://psych-svc:8081
+SPORTS_BASE=http://sports-svc:8082
+HABITS_BASE=http://habits-svc:8083
 
 # JWT Configuration
 JWT_SECRET=your-secret-key-here
@@ -72,544 +97,345 @@ ATHENA_OUTPUT=s3://your-bucket/athena-results/
 ```
 
 ### 3. Ejecutar el Sistema
+
 ```bash
 # Iniciar todos los servicios
-docker compose up -d
+docker-compose up -d
 
-# Ver logs
-docker compose logs -f
+# Verificar estado de los servicios
+docker-compose ps
 
-# Verificar estado
-docker compose ps
+# Ver logs en tiempo real
+docker-compose logs -f
 ```
 
-### 4. Verificar que Todo Funciona
+### 4. Verificar Instalación
+
 ```bash
-# Health checks
+# Verificar que todos los servicios estén funcionando
+curl http://localhost:3000  # Frontend
 curl http://localhost:8080/health  # Aggregator
-curl http://localhost:8081/api/health  # Psych
+curl http://localhost:8081/api/health  # Psychology
 curl http://localhost:8082/health  # Sports
 curl http://localhost:8083/health  # Habits
 curl http://localhost:8084/health  # Analytics
 ```
 
-## 🎯 Desarrollo del Frontend
+## 📚 Documentación de API
 
-### ¿Por qué Solo el Aggregator Service?
+### Endpoints Principales
 
-**El frontend solo debe consumir el `aggregator-svc` (puerto 8080)** por las siguientes razones:
+#### Aggregator Service (Puerto 8080)
 
-1. **Punto de Entrada Único**: El aggregator actúa como API Gateway
-2. **Agregación de Datos**: Combina información de múltiples servicios
-3. **Simplificación**: El frontend no necesita conocer la arquitectura interna
-4. **Mantenibilidad**: Cambios en microservicios no afectan el frontend
-5. **Seguridad**: Un solo punto de autenticación y autorización
-
-### API Endpoints para el Frontend
-
-#### Base URL: `http://localhost:8080`
-
-#### 1. **Vista General del Bienestar**
-```http
+```bash
+# Vista general del bienestar de un estudiante
 GET /wellbeing/{student_id}/overview
-```
-**Respuesta:**
-```json
-{
-  "student": {
-    "id": 1,
-    "name": "Juan Pérez",
-    "email": "juan@example.com",
-    "career": "Computer Science",
-    "cohort": "2024"
-  },
-  "appointments": [
-    {
-      "id": 1,
-      "studentId": 1,
-      "psychologist": "Dr. García",
-      "date": "2024-02-15T10:00:00Z",
-      "status": "CONFIRMED"
-    }
-  ],
-  "habits": [
-    {
-      "_id": "68cdd8323ddc567609e287b7",
-      "studentId": 1,
-      "sleepHours": 8,
-      "exerciseMinutes": 30,
-      "mood": "good",
-      "date": "2024-01-15T00:00:00.000Z"
-    }
-  ]
-}
-```
 
-#### 2. **Sistema de Recomendaciones**
-```http
-POST /wellbeing/recommendation?student_id={student_id}
-```
-**Respuesta:**
-```json
+# Recomendaciones personalizadas
+POST /wellbeing/recommendation
 {
-  "avg_mood": 4.0,
-  "suggested_event": {
-    "id": 1,
-    "name": "Basketball Tournament",
-    "type": "sport",
-    "date": "2024-02-15T18:00:00",
-    "location": "Sports Complex"
-  }
+  "student_id": 1
 }
-```
 
-#### 3. **Health Check**
-```http
+# Estado de salud del servicio
 GET /health
 ```
 
-### Ejemplo de Integración Frontend (React)
+#### Psychology Service (Puerto 8081)
 
-```javascript
-// services/api.js
-const API_BASE_URL = 'http://localhost:8080';
+```bash
+# Obtener estudiante
+GET /api/students/{id}
 
-export const api = {
-  // Obtener vista general del bienestar
-  getWellbeingOverview: async (studentId) => {
-    const response = await fetch(`${API_BASE_URL}/wellbeing/${studentId}/overview`);
-    return response.json();
-  },
+# Crear estudiante
+POST /api/students
+{
+  "name": "Juan Pérez",
+  "email": "juan@university.edu",
+  "career": "Computer Science",
+  "cohort": "2024"
+}
 
-  // Obtener recomendaciones
-  getRecommendations: async (studentId) => {
-    const response = await fetch(
-      `${API_BASE_URL}/wellbeing/recommendation?student_id=${studentId}`,
-      { method: 'POST' }
-    );
-    return response.json();
-  }
-};
+# Historial de citas
+GET /api/students/{id}/history
 
-// Componente React
-import React, { useState, useEffect } from 'react';
-import { api } from './services/api';
-
-function StudentDashboard({ studentId }) {
-  const [wellbeing, setWellbeing] = useState(null);
-  const [recommendations, setRecommendations] = useState(null);
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [wellbeingData, recData] = await Promise.all([
-          api.getWellbeingOverview(studentId),
-          api.getRecommendations(studentId)
-        ]);
-        setWellbeing(wellbeingData);
-        setRecommendations(recData);
-      } catch (error) {
-        console.error('Error loading data:', error);
-      }
-    };
-
-    loadData();
-  }, [studentId]);
-
-  return (
-    <div>
-      <h1>Bienestar de {wellbeing?.student?.name}</h1>
-      {/* Renderizar datos */}
-    </div>
-  );
+# Crear cita
+POST /api/appointments
+{
+  "studentId": 1,
+  "psychologist": "Dr. Smith",
+  "date": "2024-02-15T10:00:00Z",
+  "status": "PENDING"
 }
 ```
 
-## 🚀 Configuración para Despliegue
+#### Sports Service (Puerto 8082)
 
-### 1. Archivos de Configuración Necesarios
-
-#### A. Variables de Entorno de Producción
-Crear `.env.production`:
 ```bash
-# Database Configuration
-MYSQL_DATABASE=campuswell_prod
-MYSQL_USER=campus_prod
-MYSQL_PASSWORD=secure_password_here
+# Listar eventos
+GET /events?type=sport
 
-# Service URLs (para producción)
-PSYCH_BASE=http://psych-svc:8081
-SPORTS_BASE=http://sports-svc:8082
-HABITS_BASE=http://habits-svc:8083
-
-# JWT Configuration
-JWT_SECRET=production-secret-key-here
-
-# AWS Configuration
-AWS_REGION=us-east-1
-ATHENA_DB=campuswell_analytics_prod
-ATHENA_OUTPUT=s3://your-production-bucket/athena-results/
-```
-
-#### B. Docker Compose para Producción
-Crear `docker-compose.prod.yml`:
-```yaml
-version: "3.9"
-services:
-  mysql:
-    image: mysql:8
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    ports: ["3306:3306"]
-    healthcheck:
-      test: ["CMD","mysqladmin","ping","-h","localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
-    restart: unless-stopped
-
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-campuswell}
-      POSTGRES_USER: ${POSTGRES_USER:-campus}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-campus}
-    ports: ["5434:5432"]
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U campus -d campuswell"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
-
-  mongo:
-    image: mongo:7
-    ports: ["27017:27017"]
-    volumes:
-      - mongo_data:/data/db
-    restart: unless-stopped
-
-  sports-svc:
-    build: ./sports-svc
-    environment:
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-    depends_on:
-      mysql:
-        condition: service_healthy
-    ports: ["8082:8082"]
-    restart: unless-stopped
-
-  psych-svc:
-    build: ./psych-svc
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB:-campuswell}
-      - POSTGRES_USER=${POSTGRES_USER:-campus}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-campus}
-    depends_on:
-      postgres:
-        condition: service_healthy
-    ports: ["8081:8081"]
-    restart: unless-stopped
-
-  habits-svc:
-    build: ./habits-svc
-    environment:
-      - MONGODB_URI=mongodb://mongo:27017/${MYSQL_DATABASE}
-    depends_on:
-      - mongo
-    ports: ["8083:8083"]
-    restart: unless-stopped
-
-  aggregator-svc:
-    build: ./aggregator-svc
-    environment:
-      - PSYCH_BASE=${PSYCH_BASE}
-      - SPORTS_BASE=${SPORTS_BASE}
-      - HABITS_BASE=${HABITS_BASE}
-      - JWT_SECRET=${JWT_SECRET}
-    ports: ["8080:8080"]
-    restart: unless-stopped
-
-  analytics-svc:
-    build: ./analytics-svc
-    environment:
-      - AWS_REGION=${AWS_REGION}
-      - ATHENA_DB=${ATHENA_DB}
-      - ATHENA_OUTPUT=${ATHENA_OUTPUT}
-    ports: ["8084:8084"]
-    restart: unless-stopped
-
-volumes:
-  mysql_data:
-  mongo_data:
-  postgres_data:
-```
-
-#### C. Nginx Reverse Proxy (Opcional)
-Crear `nginx.conf`:
-```nginx
-events {
-    worker_connections 1024;
+# Crear evento
+POST /events
+{
+  "name": "Basketball Tournament",
+  "type": "sport",
+  "date": "2024-02-15T18:00:00",
+  "location": "Sports Complex"
 }
 
-http {
-    upstream aggregator {
-        server aggregator-svc:8080;
-    }
+# Registrar en evento
+POST /registrations?student_id=1&event_id=1
+```
 
-    server {
-        listen 80;
-        server_name your-domain.com;
+#### Habits Service (Puerto 8083)
 
-        location /api/ {
-            proxy_pass http://aggregator/;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
+```bash
+# Obtener hábitos de estudiante
+GET /habits/{student_id}
 
-        location / {
-            root /usr/share/nginx/html;
-            index index.html;
-            try_files $uri $uri/ /index.html;
-        }
-    }
+# Crear hábito
+POST /habits
+{
+  "studentId": 1,
+  "sleepHours": 8,
+  "exerciseMinutes": 30,
+  "mood": "good",
+  "date": "2024-01-15T00:00:00.000Z"
 }
 ```
 
-#### D. Dockerfile para Frontend
-Crear `frontend/Dockerfile`:
-```dockerfile
-# Build stage
-FROM node:20-alpine as build
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
+#### Analytics Service (Puerto 8084)
 
-# Production stage
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/nginx.conf
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
-```
-
-### 2. Scripts de Despliegue
-
-#### A. Script de Inicio
-Crear `start.sh`:
 ```bash
-#!/bin/bash
-echo "🚀 Iniciando CampusWell..."
+# Tendencias de estrés
+GET /analytics/stress-trends
 
-# Cargar variables de entorno
-if [ -f .env.production ]; then
-    export $(cat .env.production | xargs)
-fi
-
-# Iniciar servicios
-docker compose -f docker-compose.prod.yml up -d
-
-echo "✅ CampusWell iniciado correctamente"
-echo "📊 Dashboard: http://localhost:8080"
-echo "🔍 Health: http://localhost:8080/health"
+# Análisis por rango de edad
+GET /analytics/age-range
 ```
 
-#### B. Script de Parada
-Crear `stop.sh`:
-```bash
-#!/bin/bash
-echo "🛑 Deteniendo CampusWell..."
-docker compose -f docker-compose.prod.yml down
-echo "✅ CampusWell detenido"
-```
+## 🛠️ Desarrollo
 
-#### C. Script de Logs
-Crear `logs.sh`:
-```bash
-#!/bin/bash
-docker compose -f docker-compose.prod.yml logs -f
-```
-
-### 3. Configuración de Base de Datos
-
-#### A. Backup de Base de Datos
-Crear `backup-db.sh`:
-```bash
-#!/bin/bash
-DATE=$(date +%Y%m%d_%H%M%S)
-docker exec campuswell-mysql-1 mysqldump -u root -proot campuswell > backup_${DATE}.sql
-echo "✅ Backup creado: backup_${DATE}.sql"
-```
-
-#### B. Restore de Base de Datos
-Crear `restore-db.sh`:
-```bash
-#!/bin/bash
-if [ -z "$1" ]; then
-    echo "Uso: ./restore-db.sh <archivo.sql>"
-    exit 1
-fi
-
-docker exec -i campuswell-mysql-1 mysql -u root -proot campuswell < $1
-echo "✅ Base de datos restaurada desde $1"
-```
-
-### 4. Monitoreo y Logs
-
-#### A. Health Check Script
-Crear `health-check.sh`:
-```bash
-#!/bin/bash
-echo "🔍 Verificando salud de los servicios..."
-
-services=("8080" "8081" "8082" "8083" "8084")
-for port in "${services[@]}"; do
-    if curl -s http://localhost:$port/health > /dev/null; then
-        echo "✅ Servicio en puerto $port: OK"
-    else
-        echo "❌ Servicio en puerto $port: ERROR"
-    fi
-done
-```
-
-#### B. Logs Centralizados
-Crear `logs-centralized.sh`:
-```bash
-#!/bin/bash
-echo "📋 Logs centralizados de CampusWell"
-echo "=================================="
-docker compose -f docker-compose.prod.yml logs --tail=50
-```
-
-### 5. Estructura de Archivos para Despliegue
+### Estructura del Proyecto
 
 ```
 campuswell/
-├── README.md
-├── docker-compose.yml              # Desarrollo
-├── docker-compose.prod.yml         # Producción
-├── .env                           # Variables desarrollo
-├── .env.production                # Variables producción
-├── init-db.sql                    # Inicialización DB
-├── nginx.conf                     # Configuración Nginx
-├── start.sh                       # Script inicio
-├── stop.sh                        # Script parada
-├── logs.sh                        # Script logs
-├── health-check.sh                # Verificación salud
-├── backup-db.sh                   # Backup DB
-├── restore-db.sh                  # Restore DB
-├── frontend/                      # Aplicación frontend
+├── frontend/                    # Aplicación React
+│   ├── src/
+│   │   ├── components/         # Componentes React
+│   │   ├── pages/             # Páginas principales
+│   │   ├── services/          # Servicios de API
+│   │   └── config.js          # Configuración
 │   ├── Dockerfile
+│   └── nginx.conf
+├── aggregator-svc/             # Servicio agregador
+│   ├── main.py
+│   ├── requirements.txt
+│   └── Dockerfile
+├── psych-svc/                  # Servicio de psicología
+│   ├── src/main/java/
+│   ├── pom.xml
+│   └── Dockerfile
+├── sports-svc/                 # Servicio de deportes
+│   ├── main.py
+│   ├── requirements.txt
+│   ├── init-db.sql            # Inicialización DB MySQL
+│   └── Dockerfile
+├── habits-svc/                 # Servicio de hábitos
+│   ├── src/
 │   ├── package.json
-│   └── src/
-├── aggregator-svc/                # Servicio agregador
-├── psych-svc/                     # Servicio psicológico
-├── sports-svc/                    # Servicio deportivo
-├── habits-svc/                    # Servicio hábitos
-└── analytics-svc/                 # Servicio análisis
+│   └── Dockerfile
+├── analytics-svc/              # Servicio de analíticas
+│   ├── main.py
+│   ├── requirements.txt
+│   └── Dockerfile
+├── docker-compose.yml          # Configuración principal
+├── .env                        # Variables de entorno
+└── README.md
 ```
 
-## 🔧 Comandos Útiles
+### Comandos de Desarrollo
 
-### Desarrollo
 ```bash
-# Iniciar en modo desarrollo
-docker compose up -d
+# Construir un servicio específico
+docker-compose build <service-name>
 
-# Ver logs en tiempo real
-docker compose logs -f
+# Reiniciar un servicio
+docker-compose restart <service-name>
 
-# Reconstruir un servicio específico
-docker compose build psych-svc
-docker compose up -d psych-svc
+# Ver logs de un servicio
+docker-compose logs -f <service-name>
 
-# Parar todos los servicios
-docker compose down
+# Ejecutar comandos en un contenedor
+docker-compose exec <service-name> <command>
+
+# Acceder a la base de datos
+docker-compose exec mysql mysql -u campus -pcampus campuswell
+docker-compose exec postgres psql -U campus -d campuswell
+docker-compose exec mongo mongo campuswell
 ```
 
-### Producción
-```bash
-# Iniciar en modo producción
-./start.sh
+### Scripts de Utilidad
 
-# Verificar salud
+```bash
+# Verificar salud de todos los servicios
 ./health-check.sh
 
-# Ver logs
+# Ver logs de todos los servicios
 ./logs.sh
 
-# Parar servicios
-./stop.sh
+# Crear backup de la base de datos
+./backup-db.sh
+
+# Restaurar backup
+./restore-db.sh <backup-file.sql>
 ```
 
-## 📚 Documentación de APIs
+## 🧪 Testing
 
-### Swagger/OpenAPI
-- **Aggregator Service**: http://localhost:8080/docs
-- **Psych Service**: http://localhost:8081/swagger-ui.html
-- **Sports Service**: http://localhost:8082/docs
-- **Habits Service**: http://localhost:8083/api
-- **Analytics Service**: http://localhost:8084/docs
+### Pruebas de API
 
-## 🐛 Troubleshooting
+El proyecto incluye colecciones de Postman para cada microservicio:
+
+- `aggregator-svc/postman_aggregator.collection.json`
+- `psych-svc/postman_psych.collection.json`
+- `sports-svc/postman_sports.collection.json`
+- `habits-svc/postman_habits.collection.json`
+
+### Pruebas de Integración
+
+```bash
+# Ejecutar todas las pruebas de salud
+curl -s http://localhost:8080/health && \
+curl -s http://localhost:8081/api/health && \
+curl -s http://localhost:8082/health && \
+curl -s http://localhost:8083/health && \
+curl -s http://localhost:8084/health
+```
+
+## 🚀 Despliegue
+
+### Despliegue Local
+
+```bash
+# Usar configuración de producción
+docker-compose up -d
+
+# Verificar despliegue
+docker-compose ps
+```
+
+### Despliegue en Producción
+
+1. **Configurar variables de entorno de producción**
+2. **Configurar AWS credentials para Analytics Service**
+3. **Ajustar configuración de red y puertos**
+4. **Configurar SSL/TLS si es necesario**
+
+```bash
+# Ejemplo de despliegue con variables de producción
+export MYSQL_PASSWORD=secure_password
+export POSTGRES_PASSWORD=secure_password
+export JWT_SECRET=very_secure_secret
+docker-compose up -d
+```
+
+## 📊 Monitoreo y Logs
+
+### Verificación de Salud
+
+```bash
+# Script automatizado de verificación
+./health-check.sh
+```
+
+### Logs
+
+```bash
+# Ver todos los logs
+docker-compose logs -f
+
+# Ver logs de un servicio específico
+docker-compose logs -f <service-name>
+
+# Ver logs con timestamp
+docker-compose logs -f -t
+```
+
+## 🔧 Troubleshooting
 
 ### Problemas Comunes
 
-1. **Error de conexión a base de datos**
-   ```bash
-   # Verificar que MySQL esté corriendo (sports-svc)
-   docker compose ps mysql
-   docker compose logs mysql
-   
-   # Verificar que PostgreSQL esté corriendo (psych-svc)
-   docker compose ps postgres
-   docker compose logs postgres
-   
-   # Verificar que MongoDB esté corriendo (habits-svc)
-   docker compose ps mongo
-   docker compose logs mongo
-   ```
+#### 1. Error de Conexión a Base de Datos
 
-2. **Servicios no responden**
-   ```bash
-   # Verificar salud de todos los servicios
-   ./health-check.sh
-   
-   # Reiniciar servicios
-   docker compose restart
-   ```
+```bash
+# Verificar que las bases de datos estén funcionando
+docker-compose ps | grep -E "(mysql|postgres|mongo)"
 
-3. **Problemas de memoria**
-   ```bash
-   # Limpiar contenedores no utilizados
-   docker system prune -a
-   
-   # Ver uso de recursos
-   docker stats
-   ```
+# Verificar logs de base de datos
+docker-compose logs mysql
+docker-compose logs postgres
+docker-compose logs mongo
+```
 
-## 📞 Soporte
+#### 2. Error de CORS
 
-Para reportar problemas o solicitar ayuda:
-1. Verificar logs: `./logs.sh`
-2. Ejecutar health check: `./health-check.sh`
-3. Revisar documentación de APIs
-4. Contactar al equipo de desarrollo
+```bash
+# Verificar configuración de CORS en cada microservicio
+# Los servicios están configurados para permitir:
+# - http://localhost:3000 (desarrollo)
+# - http://frontend:80 (Docker)
+```
+
+#### 3. Puerto en Uso
+
+```bash
+# Verificar puertos en uso
+netstat -tulpn | grep -E "(3000|8080|8081|8082|8083|8084)"
+
+# Cambiar puertos en docker-compose.yml si es necesario
+```
+
+### Comandos de Limpieza
+
+```bash
+# Limpiar contenedores parados
+docker-compose down
+
+# Limpiar volúmenes (CUIDADO: elimina datos)
+docker-compose down -v
+
+# Limpiar imágenes no utilizadas
+docker system prune -a
+```
+
+## 🤝 Contribución
+
+1. Fork el proyecto
+2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abrir un Pull Request
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+
+## 👥 Autores
+
+- **Mafer Lazón** - *Backend y Frontend* - [maffzz](https://github.com/maffzz)
+- **Annemarie Saldarriaga** - *Backend y Frontend* - [AnnieSld](https://github.com/AnnieSld)
+- **Martin Bonilla** - *Despliegue* - [marbs23](https://github.com/marbs23)
+- **Ana Huapaya** - *Despliegue* - [ana17hy](https://github.com/ana17hy)
+- **Juan Renato Flores** - *Despliegue* - [tu-github](https://github.com/tu-usuario)
+
+
+## 🙏 Agradecimientos
+
+- Profe Geraldo Colchado
+- Rimac Seguros: La mejor compañía de seguros del Perú
 
 ---
 
-**¡CampusWell está listo para el desarrollo del frontend! 🎉**
+**CampusWell** - Mejorando el bienestar estudiantil a través de la tecnología 🎓✨

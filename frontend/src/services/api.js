@@ -92,7 +92,7 @@ class ApiService {
    */
   async getEvents(type = null) {
     const params = type ? `?type=${type}` : '';
-    return this.requestAbs(this.buildUrl(AGG_BASE, `/events${params}`));
+    return this.requestAbs(this.buildUrl(SPO_BASE, `/events${params}`));
   }
 
   /**
@@ -101,7 +101,7 @@ class ApiService {
    * @returns {Promise<Object>} - Evento creado
    */
   async createEvent(eventData) {
-    return this.requestAbs(this.buildUrl(AGG_BASE, '/events'), {
+    return this.requestAbs(this.buildUrl(SPO_BASE, '/events'), {
       method: 'POST',
       body: JSON.stringify(eventData),
     });
@@ -114,12 +114,8 @@ class ApiService {
    * @returns {Promise<Object>} - Resultado del registro
    */
   async registerForEvent(studentId, eventId) {
-    return this.requestAbs(this.buildUrl(AGG_BASE, `/registrations`), {
+    return this.requestAbs(this.buildUrl(SPO_BASE, `/registrations?student_id=${studentId}&event_id=${eventId}`), {
       method: 'POST',
-      body: JSON.stringify({ 
-        student_id: parseInt(studentId), 
-        event_id: parseInt(eventId) 
-      }),
     });
   }
 
@@ -129,7 +125,7 @@ class ApiService {
    * @returns {Promise<Object>} - Cita creada
    */
   async createAppointment(appointmentData) {
-    return this.requestAbs(this.buildUrl(AGG_BASE, '/appointments'), {
+    return this.requestAbs(this.buildUrl(PSY_BASE, '/api/appointments'), {
       method: 'POST',
       body: JSON.stringify(appointmentData),
     });
@@ -141,7 +137,7 @@ class ApiService {
    * @returns {Promise<Object>} - Hábito creado
    */
   async createHabit(habitData) {
-    return this.requestAbs(this.buildUrl(AGG_BASE, '/habits'), {
+    return this.requestAbs(this.buildUrl(HAB_BASE, '/habits'), {
       method: 'POST',
       body: JSON.stringify(habitData),
     });

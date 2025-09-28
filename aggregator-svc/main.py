@@ -53,67 +53,6 @@ def recommendation(student_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
-# ========== EVENTOS ==========
-@app.get("/events")
-def list_events(type: str = None):
-    """Listar eventos deportivos"""
-    try:
-        url = f"{SPO}/events" + (f"?type={type}" if type else "")
-        return client.get(url).json()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/events")
-def create_event(event_data: dict = Body(...)):
-    """Crear nuevo evento deportivo"""
-    try:
-        resp = client.post(f"{SPO}/events", json=event_data)
-        resp.raise_for_status()
-        return resp.json()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/registrations")
-def register_for_event(student_id: int, event_id: int):
-    """Registrar estudiante en evento"""
-    try:
-        resp = client.post(
-            f"{SPO}/registrations",
-            params={"student_id": student_id, "event_id": event_id}
-        )
-        resp.raise_for_status()
-        return resp.json()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-# ========== CITAS ==========
-@app.post("/appointments")
-def create_appointment(appointment_data: dict = Body(...)):
-    """Crear nueva cita psicológica"""
-    try:
-        resp = client.post(f"{PSY}/api/appointments", json=appointment_data)
-        resp.raise_for_status()
-        return resp.json()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-# ========== HÁBITOS ==========
-@app.post("/habits")
-def create_habit(habit_data: dict = Body(...)):
-    """Crear nuevo hábito"""
-    try:
-        resp = client.post(f"{HAB}/habits", json=habit_data)
-        resp.raise_for_status()
-        return resp.json()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
 # ========== HEALTH ==========
 @app.get("/health")
 def health():

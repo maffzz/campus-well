@@ -3,10 +3,10 @@ services:
   mysql:
     image: mysql:8
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: campuswell
-      MYSQL_USER: campus
-      MYSQL_PASSWORD: campus
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-campuswell}
+      MYSQL_USER: ${MYSQL_USER:-campus}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-campus}
     ports: ["3306:3306"]
     healthcheck:
       test: ["CMD","mysqladmin","ping","-h","localhost"]
@@ -15,46 +15,15 @@ services:
       retries: 5
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
-
-  sports-svc:
-    build: ./sports-svc
-    environment:
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-    depends_on:
-      mysql:
-        condition: service_healthy
-    ports: ["8082:8082"]
-
-  aggregator-svc:
-    build: ./aggregator-svc
-    environment:
-      - PSYCH_BASE=${PSYCH_BASE:-http://psych-svc:8081}
-      - SPORTS_BASE=${SPORTS_BASE:-http://sports-svc:8082}
-      - HABITS_BASE=${HABITS_BASE:-http://habits-svc:8083}
-      - JWT_SECRET=${JWT_SECRET:-devsecret}
-    depends_on:
-    - psych-svc
-    - sports-svc
-    - habits-svc
-    ports: [ "8080:8080" ]
-
-  analytics-svc:
-    build: ./analytics-svc
-    environment:
-      - AWS_REGION=${AWS_REGION}
-      - ATHENA_DB=${ATHENA_DB}
-      - ATHENA_OUTPUT=${ATHENA_OUTPUT}
-    ports: [ "8084:8084" ]
+      - ./sports-svc/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    restart: unless-stopped
 
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_DB: campuswell
-      POSTGRES_USER: campus
-      POSTGRES_PASSWORD: campus
+      POSTGRES_DB: ${POSTGRES_DB:-campuswell}
+      POSTGRES_USER: ${POSTGRES_USER:-campus}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-campus}
     ports: ["5434:5432"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U campus -d campuswell"]
@@ -63,6 +32,26 @@ services:
       retries: 5
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7
+    ports: ["27017:27017"]
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+  sports-svc:
+    build: ./sports-svc
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-campuswell}
+      - MYSQL_USER=${MYSQL_USER:-campus}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-campus}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports: ["8082:8082"]
+    restart: unless-stopped
 
   psych-svc:
     build: ./psych-svc
@@ -70,25 +59,39 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-campuswell}
       - POSTGRES_USER=${POSTGRES_USER:-campus}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-campus}
-      - SEED_PSYCH=${SEED_PSYCH:-true}
     depends_on:
       postgres:
         condition: service_healthy
     ports: ["8081:8081"]
+    restart: unless-stopped
 
   habits-svc:
     build: ./habits-svc
     environment:
-      - MONGODB_URI=mongodb://mongo:27017/campuswell
+      - MONGODB_URI=mongodb://mongo:27017/${MYSQL_DATABASE:-campuswell}
     depends_on:
       - mongo
     ports: ["8083:8083"]
+    restart: unless-stopped
 
-  mongo:
-    image: mongo:7
-    ports: ["27017:27017"]
-    volumes:
-      - mongo_data:/data/db
+  aggregator-svc:
+    build: ./aggregator-svc
+    environment:
+      - PSYCH_BASE=${PSYCH_BASE:-http://psych-svc:8081}
+      - SPORTS_BASE=${SPORTS_BASE:-http://sports-svc:8082}
+      - HABITS_BASE=${HABITS_BASE:-http://habits-svc:8083}
+      - JWT_SECRET=${JWT_SECRET:-devsecret}
+    ports: ["8080:8080"]
+    restart: unless-stopped
+
+  analytics-svc:
+    build: ./analytics-svc
+    environment:
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - ATHENA_DB=${ATHENA_DB:-campuswell_analytics}
+      - ATHENA_OUTPUT=${ATHENA_OUTPUT:-s3://your-bucket/athena-results/}
+    ports: ["8084:8084"]
+    restart: unless-stopped
 
   frontend:
     build: ./frontend
@@ -101,6 +104,7 @@ services:
       - REACT_APP_SPORTS_URL=http://sports-svc:8082
       - REACT_APP_HABITS_URL=http://habits-svc:8083
       - REACT_APP_ANALYTICS_URL=http://analytics-svc:8084
+    restart: unless-stopped
 
 volumes:
   mysql_data:
