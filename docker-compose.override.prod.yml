@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  frontend:
+    deploy:
+      replicas: 0   # no levantes frontend aquí (usa Amplify)
+  analytics-svc:
+    deploy:
+      replicas: 0   # difiere analytics por ahora
+
+  mysql:
+    ports: []   # ya se comunica por red interna de Docker
+  postgres:
+    ports: []
+  mongo:
+    ports: []
