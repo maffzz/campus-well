@@ -5,5 +5,4 @@ pymysql
 faker
 python-multipart
 cryptography
-faker
 httpx
