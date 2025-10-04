@@ -17,10 +17,22 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
+# Install PostgreSQL client for health checks
+RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
+
 # Copiamos el jar generado en la etapa de build
 COPY --from=builder /app/target/psych-svc-0.0.1.jar app.jar
 
-EXPOSE 8081
+# Create startup script
+RUN echo '#!/bin/bash\n\
+echo "Waiting for PostgreSQL to be ready..."\n\
+while ! pg_isready -h postgres -p 5432 -U campus; do\n\
+  echo "PostgreSQL is unavailable - sleeping"\n\
+  sleep 2\n\
+done\n\
+echo "PostgreSQL is up - starting psych service..."\n\
+java -jar /app/app.jar --server.port=8081 --server.address=0.0.0.0' > /app/start.sh
 
-# 👇 Aquí el cambio importante: bind-address en 0.0.0.0
-ENTRYPOINT ["java","-jar","/app/app.jar","--server.port=8081","--server.address=0.0.0.0"]
+RUN chmod +x /app/start.sh
+EXPOSE 8081
+CMD ["/app/start.sh"]

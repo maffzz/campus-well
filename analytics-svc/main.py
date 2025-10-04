@@ -4,7 +4,6 @@ import boto3, os, time
 
 app = FastAPI(title='analytics-svc')
 
-# ===== CORS =====
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -46,7 +45,6 @@ GROUP BY 1
 ORDER BY 1
 """
 
-# ===== Endpoints =====
 @app.get('/analytics/stress-trends')
 def stress():
     q = athena.start_query_execution(

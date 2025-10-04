@@ -44,6 +44,7 @@ services:
   sports-svc:
     build: ./sports-svc
     environment:
+      - MYSQL_HOST=mysql
       - MYSQL_DATABASE=${MYSQL_DATABASE:-campuswell}
       - MYSQL_USER=${MYSQL_USER:-campus}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD:-campus}
