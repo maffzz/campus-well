@@ -7,6 +7,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-campuswell}
       MYSQL_USER: ${MYSQL_USER:-campus}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-campus}
+    ports: ["3306:3306"]
     healthcheck:
       test: ["CMD","mysqladmin","ping","-h","localhost"]
       interval: 10s
@@ -23,6 +24,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-campuswell}
       POSTGRES_USER: ${POSTGRES_USER:-campus}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-campus}
+    ports: ["5434:5432"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U campus -d campuswell"]
       interval: 10s
@@ -34,6 +36,7 @@ services:
 
   mongo:
     image: mongo:7
+    ports: ["27017:27017"]
     volumes:
       - mongo_data:/data/db
     restart: unless-stopped
@@ -88,6 +91,19 @@ services:
       - ATHENA_DB=${ATHENA_DB:-campuswell_analytics}
       - ATHENA_OUTPUT=${ATHENA_OUTPUT:-s3://your-bucket/athena-results/}
     ports: ["8084:8084"]
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports: ["3000:80"]
+    depends_on:
+      - aggregator-svc
+    environment:
+      - REACT_APP_AGGREGATOR_URL=http://aggregator-svc:8080
+      - REACT_APP_PSYCH_URL=http://psych-svc:8081
+      - REACT_APP_SPORTS_URL=http://sports-svc:8082
+      - REACT_APP_HABITS_URL=http://habits-svc:8083
+      - REACT_APP_ANALYTICS_URL=http://analytics-svc:8084
     restart: unless-stopped
 
 volumes:
