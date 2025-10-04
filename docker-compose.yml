@@ -60,6 +60,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-campuswell}
       - POSTGRES_USER=${POSTGRES_USER:-campus}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-campus}
+      - SEED_PSYCH=true
     depends_on:
       postgres:
         condition: service_healthy
