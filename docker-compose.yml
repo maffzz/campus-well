@@ -94,6 +94,7 @@ services:
     restart: unless-stopped
 
   frontend:
+    profiles: ["ui"]
     build: ./frontend
     ports: ["3000:80"]
     depends_on:
