@@ -13,15 +13,27 @@ RUN echo '#!/bin/bash\n\
 echo "=== Sports Service Startup ==="\n\
 echo "MySQL should be ready (health check passed)"\n\
 echo "Testing database connection..."\n\
-if mysql -h"$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "USE $MYSQL_DATABASE; SHOW TABLES;" 2>/dev/null; then\n\
-  echo "✅ Database ready - executing seeds..."\n\
-  echo "Running seed.py (events)..."\n\
-  python seed.py || echo "⚠️ Events seed failed"\n\
-  echo "Running seed_registrations.py..."\n\
-  python seed_registrations.py || echo "⚠️ Registrations seed failed"\n\
-  echo "✅ Seeds completed - starting service..."\n\
-else\n\
-  echo "❌ Database not ready - starting service without seeds"\n\
+max_attempts=10\n\
+attempt=0\n\
+while [ $attempt -lt $max_attempts ]; do\n\
+  echo "Attempt $((attempt+1))/$max_attempts: Testing MySQL connection..."\n\
+  if mysql -h"$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "USE $MYSQL_DATABASE; SHOW TABLES;" 2>/dev/null; then\n\
+    echo "✅ Database ready - executing seeds..."\n\
+    echo "Running seed.py (events)..."\n\
+    python seed.py || echo "⚠️ Events seed failed"\n\
+    echo "Running seed_registrations.py..."\n\
+    python seed_registrations.py || echo "⚠️ Registrations seed failed"\n\
+    echo "✅ Seeds completed - starting service..."\n\
+    break\n\
+  else\n\
+    echo "❌ Database not ready (attempt $((attempt+1))/$max_attempts)"\n\
+    sleep 3\n\
+    attempt=$((attempt+1))\n\
+  fi\n\
+done\n\
+if [ $attempt -eq $max_attempts ]; then\n\
+  echo "❌ Failed to connect to database after $max_attempts attempts"\n\
+  echo "Starting service anyway..."\n\
 fi\n\
 echo "🚀 Starting sports service..."\n\
 exec uvicorn main:app --host 0.0.0.0 --port 8082' > /app/start.sh

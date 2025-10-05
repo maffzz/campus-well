@@ -1,7 +1,7 @@
 fastapi
 uvicorn[standard]
 sqlalchemy
-pymysql
+pymysql==1.1.0
 faker
 python-multipart
 cryptography

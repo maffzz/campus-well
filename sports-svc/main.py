@@ -138,7 +138,15 @@ def debug_db():
                 "status": "ok",
                 "connection_test": test_result[0] if test_result else None,
                 "tables": table_names,
-                "record_counts": counts
+                "record_counts": counts,
+                "db_url": DB_URL.replace(os.getenv('MYSQL_PASSWORD', 'campus'), '***')
             }
     except Exception as e:
-        return {"status": "error", "error": str(e)}
+        return {
+            "status": "error", 
+            "error": str(e),
+            "db_url": DB_URL.replace(os.getenv('MYSQL_PASSWORD', 'campus'), '***'),
+            "mysql_host": os.getenv('MYSQL_HOST', 'mysql'),
+            "mysql_user": os.getenv('MYSQL_USER', 'campus'),
+            "mysql_database": os.getenv('MYSQL_DATABASE', 'campuswell')
+        }
