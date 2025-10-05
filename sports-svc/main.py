@@ -9,26 +9,27 @@ import httpx
 app = FastAPI(title="sports-svc")
 
 origins = [
-    "http://localhost:3000",  # tu frontend en desarrollo
+    "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://frontend:80",  # frontend en Docker
-    "http://campuswell-frontend-1:80",  # nombre del contenedor
-    # "https://tudominio.com"  # si luego tienes producción
+    "http://frontend:80",
+    "http://campuswell-frontend-1:80",
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,         # or ["*"] para permitir todos
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
+# Database connection - SIMPLIFIED
 DB_URL = (
     f"mysql+pymysql://{os.getenv('MYSQL_USER', 'campus')}"
     f":{os.getenv('MYSQL_PASSWORD', 'campus')}@mysql:3306/{os.getenv('MYSQL_DATABASE', 'campuswell')}"
 )
+
+# NO connect_args - just basic connection
 engine = create_engine(DB_URL, pool_pre_ping=True)
 
 PSYCH_BASE = os.getenv('PSYCH_BASE', 'http://psych-svc:8081')
