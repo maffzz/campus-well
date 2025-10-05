@@ -1,38 +1,23 @@
-from fastapi import (FastAPI, HTTPException)
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import IntegrityError
-import os
 import httpx
 
 app = FastAPI(title="sports-svc")
 
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://frontend:80",
-    "http://campuswell-frontend-1:80",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Database connection - SIMPLIFIED
-DB_URL = (
-    f"mysql+pymysql://{os.getenv('MYSQL_USER', 'campus')}"
-    f":{os.getenv('MYSQL_PASSWORD', 'campus')}@mysql:3306/{os.getenv('MYSQL_DATABASE', 'campuswell')}"
-)
+# Database connection - SIMPLE AND CLEAN
+engine = create_engine("mysql+pymysql://campus:campus@mysql:3306/campuswell", pool_pre_ping=True)
 
-# NO connect_args - just basic connection
-engine = create_engine(DB_URL, pool_pre_ping=True)
-
-PSYCH_BASE = os.getenv('PSYCH_BASE', 'http://psych-svc:8081')
 http_client = httpx.Client(timeout=5.0)
 
 class EventIn(BaseModel):
@@ -65,9 +50,8 @@ def create_event(event: EventIn):
 
 @app.post("/registrations")
 def add_registration(student_id: int, event_id: int):
-    # verify student in psych-svc
     try:
-        resp = http_client.get(f"{PSYCH_BASE}/api/students/{student_id}")
+        resp = http_client.get(f"http://psych-svc:8081/api/students/{student_id}")
     except Exception:
         raise HTTPException(status_code=502, detail="psych_unreachable")
     if resp.status_code != 200:
@@ -76,12 +60,7 @@ def add_registration(student_id: int, event_id: int):
     try:
         with engine.begin() as cn:
             result = cn.execute(
-                text(
-                    """
-                    INSERT IGNORE INTO registrations(student_id,event_id)
-                    VALUES (:s,:e)
-                    """
-                ),
+                text("INSERT IGNORE INTO registrations(student_id,event_id) VALUES (:s,:e)"),
                 {"s": student_id, "e": event_id},
             )
             if result.rowcount == 1:
@@ -110,7 +89,6 @@ def add_registration(student_id: int, event_id: int):
 @app.get("/health")
 def health():
     try:
-        # Test database connection
         with engine.begin() as cn:
             cn.execute(text("SELECT 1"))
         return {"status": "ok", "database": "connected"}
@@ -121,15 +99,12 @@ def health():
 def debug_db():
     try:
         with engine.begin() as cn:
-            # Test basic connection
             result = cn.execute(text("SELECT 1 as test"))
             test_result = result.fetchone()
             
-            # Check if tables exist
             tables = cn.execute(text("SHOW TABLES")).fetchall()
             table_names = [list(row.values())[0] for row in tables]
             
-            # Count records in each table
             counts = {}
             for table in table_names:
                 count_result = cn.execute(text(f"SELECT COUNT(*) as count FROM {table}"))
@@ -139,15 +114,10 @@ def debug_db():
                 "status": "ok",
                 "connection_test": test_result[0] if test_result else None,
                 "tables": table_names,
-                "record_counts": counts,
-                "db_url": DB_URL.replace(os.getenv('MYSQL_PASSWORD', 'campus'), '***')
+                "record_counts": counts
             }
     except Exception as e:
         return {
             "status": "error", 
-            "error": str(e),
-            "db_url": DB_URL.replace(os.getenv('MYSQL_PASSWORD', 'campus'), '***'),
-            "mysql_host": os.getenv('MYSQL_HOST', 'mysql'),
-            "mysql_user": os.getenv('MYSQL_USER', 'campus'),
-            "mysql_database": os.getenv('MYSQL_DATABASE', 'campuswell')
+            "error": str(e)
         }

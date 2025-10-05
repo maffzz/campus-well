@@ -6,15 +6,12 @@ RUN apt-get update && apt-get install -y default-mysql-client && rm -rf /var/lib
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY . .
-COPY ../debug-sports.py /app/debug-sports.py
 EXPOSE 8082
 
 # Create startup script
 RUN echo '#!/bin/bash\n\
 echo "=== Sports Service Startup ==="\n\
 echo "MySQL should be ready (health check passed)"\n\
-echo "Running diagnostic script..."\n\
-python debug-sports.py\n\
 echo "Testing database connection..."\n\
 max_attempts=10\n\
 attempt=0\n\

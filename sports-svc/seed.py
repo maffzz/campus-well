@@ -2,12 +2,7 @@ from sqlalchemy import create_engine, text
 from faker import Faker
 import os, random
 
-MYSQL_HOST = os.getenv('MYSQL_HOST', 'localhost')
-DB_URL = (
-    f"mysql+pymysql://{os.getenv('MYSQL_USER','campus')}:"
-    f"{os.getenv('MYSQL_PASSWORD','campus')}@{MYSQL_HOST}:3306/"
-    f"{os.getenv('MYSQL_DATABASE','campuswell')}"
-)
+DB_URL = "mysql+pymysql://campus:campus@mysql:3306/campuswell"
 
 fake = Faker()
 
