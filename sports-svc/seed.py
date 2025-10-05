@@ -20,7 +20,7 @@ LOCATIONS = [
 ]
 
 def seed_events(num_rows: int = 20000):
-    engine = create_engine(DB_URL, pool_pre_ping=True)
+    engine = create_engine(DB_URL, pool_pre_ping=True, connect_args={"auth_plugin": "mysql_native_password"})
     inserted = 0
     batch = []
     with engine.begin() as cn:
