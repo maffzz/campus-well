@@ -10,10 +10,10 @@ services:
     command: --bind-address=0.0.0.0 --port=3306
     healthcheck:
       test: ["CMD-SHELL", "mysql -u campus -p campus -e 'SELECT 1' > /dev/null 2>&1"]
-      interval: 10s
+      interval: 5s
       timeout: 10s
-      retries: 20
-      start_period: 60s
+      retries: 30
+      start_period: 90s
     volumes:
       - mysql_data:/var/lib/mysql
       - ./sports-svc/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
@@ -48,7 +48,8 @@ services:
       - MYSQL_USER=${MYSQL_USER:-campus}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD:-campus}
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     ports: ["8082:8082"]
     restart: unless-stopped
 
