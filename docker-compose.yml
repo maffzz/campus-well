@@ -9,11 +9,11 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-campus}
     command: --bind-address=0.0.0.0
     healthcheck:
-      test: ["CMD","mysqladmin","ping","-h","localhost","-u","campus","-p","campus"]
+      test: ["CMD","mysqladmin","ping","-h","localhost","-u","campus","-p","campus","--silent"]
       interval: 10s
       timeout: 5s
-      retries: 10
-      start_period: 30s
+      retries: 15
+      start_period: 40s
     volumes:
       - mysql_data:/var/lib/mysql
       - ./sports-svc/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
