@@ -29,7 +29,7 @@ DB_URL = (
     f"mysql+pymysql://{os.getenv('MYSQL_USER', 'campus')}"
     f":{os.getenv('MYSQL_PASSWORD', 'campus')}@mysql:3306/{os.getenv('MYSQL_DATABASE', 'campuswell')}"
 )
-engine = create_engine(DB_URL, pool_pre_ping=True, connect_args={"auth_plugin": "mysql_native_password"})
+engine = create_engine(DB_URL, pool_pre_ping=True)
 
 PSYCH_BASE = os.getenv('PSYCH_BASE', 'http://psych-svc:8081')
 http_client = httpx.Client(timeout=5.0)

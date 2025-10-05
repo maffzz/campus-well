@@ -16,7 +16,7 @@ def load_event_ids(cn):
     return [r[0] for r in rows]
 
 def seed_registrations(num_rows: int = 20000, max_student_id: int = 5000):
-    engine = create_engine(DB_URL, pool_pre_ping=True, connect_args={"auth_plugin": "mysql_native_password"})
+    engine = create_engine(DB_URL, pool_pre_ping=True)
     inserted = 0
     with engine.begin() as cn:
         event_ids = load_event_ids(cn)
