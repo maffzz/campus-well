@@ -108,4 +108,37 @@ def add_registration(student_id: int, event_id: int):
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    try:
+        # Test database connection
+        with engine.begin() as cn:
+            cn.execute(text("SELECT 1"))
+        return {"status": "ok", "database": "connected"}
+    except Exception as e:
+        return {"status": "error", "database": "disconnected", "error": str(e)}
+
+@app.get("/debug/db")
+def debug_db():
+    try:
+        with engine.begin() as cn:
+            # Test basic connection
+            result = cn.execute(text("SELECT 1 as test"))
+            test_result = result.fetchone()
+            
+            # Check if tables exist
+            tables = cn.execute(text("SHOW TABLES")).fetchall()
+            table_names = [list(row.values())[0] for row in tables]
+            
+            # Count records in each table
+            counts = {}
+            for table in table_names:
+                count_result = cn.execute(text(f"SELECT COUNT(*) as count FROM {table}"))
+                counts[table] = count_result.fetchone()[0]
+            
+            return {
+                "status": "ok",
+                "connection_test": test_result[0] if test_result else None,
+                "tables": table_names,
+                "record_counts": counts
+            }
+    except Exception as e:
+        return {"status": "error", "error": str(e)}

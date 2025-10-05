@@ -7,11 +7,13 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-campuswell}
       MYSQL_USER: ${MYSQL_USER:-campus}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-campus}
+    command: --default-authentication-plugin=mysql_native_password --bind-address=0.0.0.0
     healthcheck:
-      test: ["CMD","mysqladmin","ping","-h","localhost"]
+      test: ["CMD","mysqladmin","ping","-h","localhost","-u","campus","-p","campus"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 30s
     volumes:
       - mysql_data:/var/lib/mysql
       - ./sports-svc/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
