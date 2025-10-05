@@ -94,6 +94,28 @@ services:
     ports: ["8084:8084"]
     restart: unless-stopped
 
+  # Ejecuta el seeding de eventos automáticamente y termina
+  sports-seed:
+    profiles: ["seed"]
+    build: ./sports-svc
+    depends_on:
+      mysql:
+        condition: service_healthy
+    command: ["python", "seed.py"]
+    restart: "no"
+
+  # Opcional: ejecuta el seeding de registros después de cargar eventos
+  sports-seed-registrations:
+    profiles: ["seed"]
+    build: ./sports-svc
+    depends_on:
+      mysql:
+        condition: service_healthy
+      sports-seed:
+        condition: service_completed_successfully
+    command: ["python", "seed_registrations.py"]
+    restart: "no"
+
   frontend:
     profiles: ["ui"]
     build: ./frontend
