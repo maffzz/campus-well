@@ -16,13 +16,7 @@ async function bootstrap() {
 
   // --- ✅ Configuración de CORS ---
   app.enableCors({
-    origin: [
-      'http://localhost:3000', // Frontend React en desarrollo
-      'http://127.0.0.1:3000',
-      'http://frontend:80', // frontend en Docker
-      'http://campuswell-frontend-1:80', // nombre del contenedor
-      // 'https://tudominio.com'  // 👉 agrega tu dominio en producción si aplica
-    ],
+    origin: ['*'],
     methods: '*',         // Permite todos los métodos (GET, POST, etc.)
     allowedHeaders: '*',  // Permite todos los headers
     credentials: true     // Necesario si usas cookies o auth

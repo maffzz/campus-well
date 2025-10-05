@@ -4,12 +4,7 @@ import boto3, os, time
 
 app = FastAPI(title='analytics-svc')
 
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://frontend:80",
-    "http://campuswell-frontend-1:80",
-]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,

@@ -6,7 +6,7 @@ app = FastAPI(title="aggregator-svc")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://frontend:80", "http://campuswell-frontend-1:80"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
