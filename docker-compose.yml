@@ -14,6 +14,7 @@ services:
       timeout: 5s
       retries: 20
       start_period: 60s
+    ports: ["3307:3307"]
     volumes:
       - mysql_data:/var/lib/mysql
       - ./sports-svc/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
@@ -30,12 +31,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    ports: ["5432:5432"]
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
   mongo:
     image: mongo:7
+    ports: ["27017:27017"]
     volumes:
       - mongo_data:/data/db
     restart: unless-stopped
