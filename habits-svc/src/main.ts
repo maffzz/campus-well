@@ -4,6 +4,9 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  
+  // --- Configuración de prefijo global ---
+  app.setGlobalPrefix('habits');
 
   // --- Configuración de Swagger ---
   const config = new DocumentBuilder()

@@ -14,7 +14,6 @@ services:
       timeout: 5s
       retries: 20
       start_period: 60s
-    ports: ["3307:3307"]
     volumes:
       - mysql_data:/var/lib/mysql
       - ./sports-svc/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
@@ -31,14 +30,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    ports: ["5432:5432"]
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
   mongo:
     image: mongo:7
-    ports: ["27017:27017"]
     volumes:
       - mongo_data:/data/db
     restart: unless-stopped
@@ -81,10 +78,14 @@ services:
   aggregator-svc:
     build: ./aggregator-svc
     environment:
-      - PSYCH_BASE=${PSYCH_BASE:-http://psych-svc:8081}
-      - SPORTS_BASE=${SPORTS_BASE:-http://sports-svc:8082}
-      - HABITS_BASE=${HABITS_BASE:-http://habits-svc:8083}
+      - PSYCH_BASE=${PSYCH_BASE:-http://psych-svc:8081/psych}
+      - SPORTS_BASE=${SPORTS_BASE:-http://sports-svc:8082/sports}
+      - HABITS_BASE=${HABITS_BASE:-http://habits-svc:8083/habits}
       - JWT_SECRET=${JWT_SECRET:-devsecret}
+    depends_on:
+      - psych-svc
+      - sports-svc
+      - habits-svc
     ports: ["8080:8080"]
     restart: unless-stopped
 

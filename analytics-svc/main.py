@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import boto3, os, time
 
-app = FastAPI(title='analytics-svc')
+app = FastAPI(title='analytics-svc', root_path="/analytics")
 
 origins = ["*"]
 

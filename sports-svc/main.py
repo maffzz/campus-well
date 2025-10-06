@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.exc import IntegrityError
 import httpx
 
-app = FastAPI(title="sports-svc")
+app = FastAPI(title="sports-svc", root_path="/sports")
 
 app.add_middleware(
     CORSMiddleware,

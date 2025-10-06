@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 import httpx, os
 
-app = FastAPI(title="aggregator-svc")
+app = FastAPI(title="aggregator-svc", root_path="/aggregator")
 
 app.add_middleware(
     CORSMiddleware,
@@ -12,10 +12,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# URLs de microservicios
-PSY = os.getenv("PSYCH_BASE", "http://psych-svc:8081")
-SPO = os.getenv("SPORTS_BASE", "http://sports-svc:8082")
-HAB = os.getenv("HABITS_BASE", "http://habits-svc:8083")
+# URLs de microservicios con prefijos
+PSY = os.getenv("PSYCH_BASE", "http://psych-svc:8081/psych")
+SPO = os.getenv("SPORTS_BASE", "http://sports-svc:8082/sports")
+HAB = os.getenv("HABITS_BASE", "http://habits-svc:8083/habits")
 
 client = httpx.Client(timeout=10.0, limits=httpx.Limits(max_connections=100, max_keepalive_connections=20))
 
