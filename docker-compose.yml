@@ -42,6 +42,8 @@ services:
 
   sports-svc:
     build: ./sports-svc
+    env_file:
+      - .env
     environment:
       - MYSQL_HOST=mysql
       - MYSQL_DATABASE=${MYSQL_DATABASE:-campuswell}
@@ -55,6 +57,8 @@ services:
 
   psych-svc:
     build: ./psych-svc
+    env_file:
+      - .env
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-campuswell}
       - POSTGRES_USER=${POSTGRES_USER:-campus}
@@ -68,6 +72,8 @@ services:
 
   habits-svc:
     build: ./habits-svc
+    env_file:
+      - .env
     environment:
       - MONGODB_URI=mongodb://mongo:27017/${MYSQL_DATABASE:-campuswell}
     depends_on:
@@ -77,6 +83,8 @@ services:
 
   aggregator-svc:
     build: ./aggregator-svc
+    env_file:
+      - .env
     environment:
       - PSYCH_BASE=${PSYCH_BASE:-http://psych-svc:8081/psych}
       - SPORTS_BASE=${SPORTS_BASE:-http://sports-svc:8082/sports}
@@ -91,6 +99,8 @@ services:
 
   analytics-svc:
     build: ./analytics-svc
+    env_file:
+      - .env
     environment:
       - AWS_REGION=${AWS_REGION:-us-east-1}
       - ATHENA_DB=${ATHENA_DB:-campuswell_analytics}
