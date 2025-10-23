@@ -4,6 +4,9 @@ from pydantic import BaseModel
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import IntegrityError
 import httpx
+import os
+
+PSYCH_BASE = os.getenv("PSYCH_BASE", "http://psych-svc:8081")
 
 app = FastAPI(title="sports-svc", root_path="/sports")
 
@@ -51,7 +54,7 @@ def create_event(event: EventIn):
 @app.post("/registrations")
 def add_registration(student_id: int, event_id: int):
     try:
-        resp = http_client.get(f"http://psych-svc:8081/api/students/{student_id}")
+        resp = http_client.get(f"{PSYCH_BASE}/api/students/{student_id}")
     except Exception:
         raise HTTPException(status_code=502, detail="psych_unreachable")
     if resp.status_code != 200:
