@@ -19,25 +19,32 @@ DB  = os.getenv('ATHENA_DB')
 OUT = os.getenv('ATHENA_OUTPUT')
 
 SQL_STRESS = """
-SELECT date_trunc('week', date) wk, count(*) confirmed
-FROM psych_appointments
-WHERE status='CONFIRMED'
-GROUP BY 1 ORDER BY 1
+SELECT 
+  date_format(
+    date_trunc(
+      'week',
+      from_iso8601_timestamp(
+        regexp_replace(date, '(\\.\\d+Z)$', 'Z')
+      )
+    ),
+    '%Y-%m-%d'
+  ) AS week_start,
+  COUNT(*) AS confirmed
+FROM psych
+WHERE status = 'CONFIRMED'
+GROUP BY 1
+ORDER BY 1;
 """
 
 SQL_AGE_RANGE = """
-SELECT
-  CASE
-    WHEN age BETWEEN 18 AND 24 THEN '18-24'
-    WHEN age BETWEEN 25 AND 34 THEN '25-34'
-    WHEN age BETWEEN 35 AND 44 THEN '35-44'
-    WHEN age BETWEEN 45 AND 54 THEN '45-54'
-    ELSE '55+'
-  END AS age_range,
-  COUNT(*) as num_students
-FROM students
-GROUP BY 1
-ORDER BY 1
+SELECT 
+  mood,
+  COUNT(*) AS total_registros,
+  ROUND(AVG(sleephours), 2) AS avg_sleep,
+  ROUND(AVG(exerciseminutes), 2) AS avg_exercise
+FROM habits
+GROUP BY mood
+ORDER BY total_registros DESC
 """
 
 @app.get('/analytics/stress-trends')
