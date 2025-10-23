@@ -224,6 +224,10 @@ class ApiService {
   async analyticsStressTrends() {
     return this.requestAbs(this.buildUrl(ANA_BASE, `/analytics/stress-trends`));
   }
+  async analyticsAgeRange() {
+    // El endpoint mantiene el nombre legacy pero ahora devuelve métricas de hábitos por estado de ánimo
+    return this.requestAbs(this.buildUrl(ANA_BASE, `/analytics/age-range`));
+  }
   async analyticsHealth() {
     return this.requestAbs(this.buildUrl(ANA_BASE, `/health`));
   }
